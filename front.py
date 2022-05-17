@@ -6,7 +6,7 @@ def start():
 
 def two_player():
     print("Two player mode.\n")
-    back.two_player_mode()
+    two_player_mode()
 
 
 if __name__ == "__main__":

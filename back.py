@@ -2,14 +2,17 @@ from front import *
 import random
 import re
 
-INITIAL_POSITIONS = [(2,4),(2,0),(0,4),(1,4),(3,4),(4,4),(0,0),(1,0),(3,0),(4,0)]
+# Define initial postitions for a typical game
+INITIAL_POSITIONS = [(2,4),(0,4),(1,4),(3,4),(4,4),(2,0),(0,0),(1,0),(3,0),(4,0)]
 
+# Card class represents a card in Onitama
 class CARD:
     def __init__(self, name, stamp, moves):
         self.name = name
         self.stamp = stamp
         self.moves = moves
 
+# The Deck contains all cards in Onitama
 DECK = [
     CARD('tiger', 'red', [(0,2), (0,-1)]),
     CARD('monkey', 'red', [(1,1),(-1,1),(-1,-1),(1,-1)]),
@@ -18,65 +21,137 @@ DECK = [
     CARD('mantis', 'blue', [(1,1),(-1,1),(0,-1)])
 ]
 
+# The Board class represents a gamestate
 class BOARD:
-    def __init__(self, turn, positions, cards)
+    def __init__(self, turn, positions, cards):
         self.turn = turn
         self.positions = positions
         self.cards = cards
 
+# Returns a board object representing the beginning of an Onitama game. Cards are randomly selected from the Deck
 def initialise_board():
-    sel = []
-    while len(sel)<5:
-        num = random.randint(0,len(DECK)-1)
-        if num not in sel: sel.append(num)
-    cards = [DECK[x] for x in sel]
 
-    turn = 0 if cards[4].stamp == "RED" else turn = 1
+    cards = [] # List of cards
+
+    while len(cards)<5: # Choose 5 different random cards from the deck
+        num = random.randint(0,len(DECK)-1)
+        if DECK[num] not in cards: cards.append(DECK[num])
+
+    turn = 0 if cards[4].stamp == "red" else 1 # Set game to start on turn 0 or 1 depending on whether RED or BLUE start respectively
 
     return BOARD(turn, INITIAL_POSITIONS, cards)
 
-def print_board():
+def print_board(board):
     pass #TODO
 
-def print_victory():
+def print_victory(victory_type):
     pass #TODO
 
-def execute_move(move):
-    pass #TODO
+# Updates the board state by executing a move
+def execute_move(board, move, card):
 
+    board.turn += 1 # Increments turn count
+
+    # Swaps used card with waiting card
+    board.cards[board.cards.index(card)] = board.cards[4]
+    board.cards[4] = card
+
+    # Captures enemy piece, if it exists
+    try: board.positions[board.positions.index(move[1])] = (-1,-1)
+    except ValueError: pass
+
+    # Updates piece's position
+    board.positions[board.positions.index(move[0])] = move[1]
+
+# Returns type of victory attained in a given board state, None if the game is not won.
 def is_won(board):
     if board.positions[0] == (2,0): return ("RED", "WIND")
-    elif board.positions[1] == (2,4): return ("BLUE", "WIND")
+    elif board.positions[5] == (2,4): return ("BLUE", "WIND")
     elif board.positions[0] == (-1,-1): return ("BLUE", "ROCK")
-    elif board.positions[1] == (-1,-1): return ("RED", "ROCK")
-    else return NULL
+    elif board.positions[5] == (-1,-1): return ("RED", "ROCK")
+    else: return None
 
+# Main game loop for two player mode
 def two_player_mode():
-    board = initialise_board()
-    while TRUE:
 
-        print_board(board)
+    board = initialise_board() # Set initial boardstate
 
-        if board.is_won() is not NULL:
-            print_victory(board.iswon())
+    while True: # Main game loop
+
+        print_board(board) # Print boardstate at beginning of any turn
+
+        # Check if the board is won, end game if so
+        if is_won(board) is not None:
+            print_victory(is_won(board)) # Print victory information
             return
 
-        if board.turn % 2 == 0:
+        # Print information about who's turn it is, and prepare that player's pieces and cards to be referenced
+        if board.turn % 2 == 0: 
             print("RED's turn.")
-        else: print("BLUE's turn.")
+            pieces = board.positions[0:5] # Red's Master and Students
+            cards = board.cards[0:2] # Red's cards
+        else: 
+            print("BLUE's turn.")
+            pieces = board.positions[5:10] # Blue's Master and Students
+            cards = board.cards[2:4] # Blue's  cards
 
-        while TRUE:
-            move_input = input("Move a piece by typing it's starting and ending coords: \"(x0,y0),(x1,y1)\".")
-            if not re.match("(\d,\d),(\d,\d)"):
+        while True: # Loop to request and verify player's move
+
+            move_input = input("Move a piece by typing it's starting and ending coords: \"(x0,y0),(x1,y1)\".\n") # Take input on desired move
+
+            # Check regex match
+            if not re.match("\(\d,\d\),\(\d,\d\)", move_input): 
                 print("Could not parse input.")
                 continue
-            ints = re.findall("\d", move_input)
-            move = [ (ints[0], ints[1]), (ints[2], ints[3]) ]
-            
-            #TODO: reject moves not moving player's own piece
-            #TODO: reject moves not landing on an empty square or enemy piece
 
+            ints = [int(x) for x in re.findall("\d", move_input)] # Regex pull digits
+
+            # Check coordinates are on the board
+            if len(ints) != 4 or any(x not in range(5) for x in ints): 
+                print("Invalid Coordinates.")
+                continue
+            
+            move = [ (ints[0], ints[1]), (ints[2], ints[3]) ] # Parses ints to coordinate notation used everywhere else
+            
+            # Check input moves a friendly piece
+            if move[0] not in pieces: 
+                print("Coordinate does not specify a friendly piece.")
+                continue
+
+            # Check input does not capture a friendly piece
+            if move[1] in pieces:
+                print("Move cannot land on a friendly piece.")
+                continue
+
+            resultant_move = (move[1][0]-move[0][0],move[1][1]-move[0][1]) # Convert move to notation used in cards
+
+            # Check move is described by a card in hand
+            if  resultant_move not in cards[0].moves and resultant_move not in cards[1].moves: 
+                print("Move not in current hand.")
+                continue
+
+            # Handle extra response when move is possible with either card
+            if resultant_move in cards[0].moves and resultant_move in cards[1].moves: 
+                
+                while True: # Loop to specify desired card
+                    response = input("Move is possible with either card. Name the desired card to use. exmpl: \"pigeon\"\n")
+
+                    # Check that response is a card in the player's hand
+                    if response != cards[0].name and response != cards[1].name:
+                        print("That is not the name of one of your cards.")
+                        continue
+                    break
+
+                # Record card used
+                if response == cards[0].name: card_used = 0
+                else: card_used = 1
+                break
+
+            # Record card used
+            if resultant_move in cards[0].moves: card_used = 0
+            else: card_used = 1
             break
 
-        execute_move(move)
+        # Update boardstate by executing move
+        execute_move(board, move, cards[card_used])
         

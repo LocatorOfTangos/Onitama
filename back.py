@@ -42,7 +42,28 @@ def initialise_board():
     return BOARD(turn, INITIAL_POSITIONS, cards)
 
 def print_board(board):
-    pass #TODO
+
+    # Initialise matrix for containing piece locations
+    matrix = [[" "," "," "," "," "] for i in range(5)]
+
+    # Loop through pieces on the board, replace corresponsing matrix entry with appropriate character
+    for num, piece in enumerate(board.positions):
+
+        if piece == (-1,-1): continue # Ignore if piece is captured
+
+        if num == 0: matrix[piece[1]][piece[0]] = "R"
+        elif num <= 4: matrix[piece[1]][piece[0]] = "r"
+        elif num <= 5: matrix[piece[1]][piece[0]] = "B"
+        else: matrix[piece[1]][piece[0]] = "b"
+    
+    bar = " | " # Prepare string to make f string list join work
+
+    # Da printi
+    print("   0   1   2   3   4")
+    print(" +---+---+---+---+---+")
+    for i in range(5):
+        print(f"{i}| {bar.join(matrix[i])} |")
+        print(" +---+---+---+---+---+")
 
 def print_victory(victory_type):
     pass #TODO
@@ -90,17 +111,19 @@ def two_player_mode():
             print("RED's turn.")
             pieces = board.positions[0:5] # Red's Master and Students
             cards = board.cards[0:2] # Red's cards
+            ymul = -1 # Multiplier reverses y-axis for given moves
         else: 
             print("BLUE's turn.")
             pieces = board.positions[5:10] # Blue's Master and Students
             cards = board.cards[2:4] # Blue's  cards
+            ymul = 1 # Multiplier does not reverse y-axis for given moves
 
         while True: # Loop to request and verify player's move
 
-            move_input = input("Move a piece by typing it's starting and ending coords: \"(x0,y0),(x1,y1)\".\n") # Take input on desired move
+            move_input = input("Move a piece by typing it's starting and ending coords: \"(x0,y0) (x1,y1)\".\n") # Take input on desired move
 
             # Check regex match
-            if not re.match("\(\d,\d\),\(\d,\d\)", move_input): 
+            if not re.match("\(\d,\d\) \(\d,\d\)", move_input): 
                 print("Could not parse input.")
                 continue
 
@@ -123,7 +146,7 @@ def two_player_mode():
                 print("Move cannot land on a friendly piece.")
                 continue
 
-            resultant_move = (move[1][0]-move[0][0],move[1][1]-move[0][1]) # Convert move to notation used in cards
+            resultant_move = (move[1][0]-move[0][0],ymul*move[1][1]-ymul*move[0][1]) # Convert move to notation used in cards
 
             # Check move is described by a card in hand
             if  resultant_move not in cards[0].moves and resultant_move not in cards[1].moves: 
@@ -134,7 +157,7 @@ def two_player_mode():
             if resultant_move in cards[0].moves and resultant_move in cards[1].moves: 
                 
                 while True: # Loop to specify desired card
-                    response = input("Move is possible with either card. Name the desired card to use. exmpl: \"pigeon\"\n")
+                    response = input("Move is possible with either card. Name the desired card.\n")
 
                     # Check that response is a card in the player's hand
                     if response != cards[0].name and response != cards[1].name:

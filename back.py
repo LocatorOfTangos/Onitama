@@ -12,6 +12,31 @@ class CARD:
         self.stamp = stamp
         self.moves = moves
 
+    def matrix(self):
+
+        # Initialise matrix for containing possible moves
+        matrix = [[".",".",".",".","."] for i in range(5)]
+        matrix[2][2] = "@"
+        
+        # Loop through moves, replace corresponsing matrix entry with "#"
+        for move in self.moves:
+            matrix[move[1]+2][move[0]+2] = "#"
+
+        space = ""
+
+        full_matrix = [
+            " --------- ",
+            f"|{self.name}"+(9-len(self.name))*" "+"|",
+        ]
+
+        for i in range(5):
+            full_matrix.append("|    "+f"{space.join(matrix[i])}"+"|")
+        
+        full_matrix.append(" --------- ")
+        
+        return full_matrix
+
+
 # The Deck contains all cards in Onitama
 DECK = [
     CARD('tiger', 'red', [(0,2), (0,-1)]),
@@ -28,6 +53,34 @@ class BOARD:
         self.positions = positions
         self.cards = cards
 
+    def matrix(self):
+
+        # Initialise matrix for containing piece locations
+        matrix = [[" "," "," "," "," "] for i in range(5)]
+
+        # Loop through pieces on the board, replace corresponsing matrix entry with appropriate character
+        for num, piece in enumerate(self.positions):
+
+            if piece == (-1,-1): continue # Ignore piece if captured
+
+            if num == 0: matrix[piece[1]][piece[0]] = "R"
+            elif num <= 4: matrix[piece[1]][piece[0]] = "r"
+            elif num <= 5: matrix[piece[1]][piece[0]] = "B"
+            else: matrix[piece[1]][piece[0]] = "b"
+        
+        full_matrix = [
+            "   0   1   2   3   4  ",
+            " +---+---+---+---+---+",
+        ]
+
+        bar = " | " # Prepare string to make f string list join work
+
+        for i in range(5):
+            full_matrix.append(f"{i}| {bar.join(matrix[i])} |")
+            full_matrix.append(" +---+---+---+---+---+")
+        
+        return full_matrix
+
 # Returns a board object representing the beginning of an Onitama game. Cards are randomly selected from the Deck
 def initialise_board():
 
@@ -43,27 +96,19 @@ def initialise_board():
 
 def print_board(board):
 
-    # Initialise matrix for containing piece locations
-    matrix = [[" "," "," "," "," "] for i in range(5)]
+    matrix0 = board.cards[0].matrix()
+    matrix1 = board.cards[1].matrix()
+    matrix2 = board.cards[2].matrix()
+    matrix3 = board.cards[3].matrix()
 
-    # Loop through pieces on the board, replace corresponsing matrix entry with appropriate character
-    for num, piece in enumerate(board.positions):
+    for i in range(8):
+        print(f"{matrix3[i]} {matrix2[i]}")
 
-        if piece == (-1,-1): continue # Ignore if piece is captured
+    for row in board.matrix():
+        print(row)
 
-        if num == 0: matrix[piece[1]][piece[0]] = "R"
-        elif num <= 4: matrix[piece[1]][piece[0]] = "r"
-        elif num <= 5: matrix[piece[1]][piece[0]] = "B"
-        else: matrix[piece[1]][piece[0]] = "b"
-    
-    bar = " | " # Prepare string to make f string list join work
-
-    # Da printi
-    print("   0   1   2   3   4")
-    print(" +---+---+---+---+---+")
-    for i in range(5):
-        print(f"{i}| {bar.join(matrix[i])} |")
-        print(" +---+---+---+---+---+")
+    for i in range(8):
+        print(f"{matrix0[7-i]} {matrix1[7-i]}")
 
 def print_victory(victory_type):
     pass #TODO

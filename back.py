@@ -22,12 +22,15 @@ class CARD:
         for move in self.moves:
             matrix[move[1]+1][move[0]+2] = "#"
 
-        space = " "
-
+        # Initialise full_matrix with first line (spaced card name)
         full_matrix = [
-            (9-len(self.name))//2*" "+f"{self.name}"+-(-(9-len(self.name))//2)*" ",
+            (9-len(self.name))//2*" "+f"{self.name}"+-(-(9-len(self.name))//2)*" "
         ]
 
+        # Prepare string to make f string list join work
+        space = " "
+
+        # successively fill out the rest of full_matrix
         for i in range(4):
             full_matrix.append(f"{space.join(matrix[i])}")
         
@@ -36,11 +39,22 @@ class CARD:
 
 # The Deck contains all cards in Onitama
 DECK = [
-    CARD('tiger', 'red', [(0,2), (0,-1)]),
-    CARD('monkey', 'red', [(1,1),(-1,1),(-1,-1),(1,-1)]),
+    CARD('tiger', 'blue', [(0,2), (0,-1)]),
+    CARD('monkey', 'blue', [(1,1),(-1,1),(-1,-1),(1,-1)]),
     CARD('dragon', 'red', [(2,1),(-2,1),(-1,-1),(1,-1)]),
     CARD('crab', 'blue', [(2,0),(-2,0),(0,1)]),
-    CARD('mantis', 'blue', [(1,1),(-1,1),(0,-1)])
+    CARD('mantis', 'red', [(1,1),(-1,1),(0,-1)]),
+    CARD('frog', 'red', [(-2,0),(-1,1),(1,-1)]),
+    CARD('elephant', 'red', [(-1,0),(-1,1),(1,1),(1,0)]),
+    CARD('rooster', 'red', [(-1,0),(-1,-1),(1,1),(1,0)]),
+    CARD('boar', 'red', [(-1,0),(0,1),(1,0)]),
+    CARD('ox', 'blue', [(1,0),(0,-1),(0,1)]),
+    CARD('crane', 'blue', [(1,-1),(-1,-1),(0,1)]),
+    CARD('eel', 'blue', [(-1,1),(-1,-1),(1,0)]),
+    CARD('horse', 'red', [(-1,0),(0,-1),(0,1)]),
+    CARD('cobra', 'red', [(1,1),(1,-1),(-1,0)]),
+    CARD('goose', 'blue', [(-1,0),(-1,1),(1,-1),(1,0)]),
+    CARD('rabbit', 'blue', [(2,0),(1,1),(-1,-1)])
 ]
 
 # The Board class represents a gamestate
@@ -65,12 +79,14 @@ class BOARD:
             elif num <= 5: matrix[piece[1]][piece[0]] = "B"
             else: matrix[piece[1]][piece[0]] = "b"
         
+        # Initialise first line of full_matrix
         full_matrix = [
-            "+---+---+---+---+---+",
+            "+---+---+---+---+---+"
         ]
 
         bar = " | " # Prepare string to make f string list join work
 
+        # successively fill out the rest of full_matrix
         for i in range(5):
             full_matrix.append(f"| {bar.join(matrix[i])} |")
             full_matrix.append("+---+---+---+---+---+")
@@ -102,7 +118,7 @@ def print_board(board):
     if board.turn % 2 == 0: # Red's turn
 
         for i in range(5): # Prints Blue's cards
-            print(f" {matrix3[i]}   {matrix2[i]} ")
+            print(f" {matrix3[i]}   {matrix2[i]} ") if i == 0 else print(f" {matrix3[i][::-1]}   {matrix2[i][::-1]} ")
 
         # Prints play area
         for num, row in enumerate(board.matrix()): # Prints row numbers
@@ -120,7 +136,7 @@ def print_board(board):
     else:   # Blue's turn
 
         for i in range(5): # Prints Red's cards
-            print(f" {matrix1[i]}   {matrix0[i]} ")
+            print(f" {matrix1[i]}   {matrix0[i]} ") if i == 0 else print(f" {matrix1[i][::-1]}   {matrix0[i][::-1]} ")
 
         # Prints play area
         for num, row in enumerate(reversed(board.matrix())): # Prints row numbers
@@ -134,9 +150,12 @@ def print_board(board):
 
         for i in range(5): # Prints Blue's cards
             print(f" {matrix2[4-i]}   {matrix3[4-i]} ")
+    print()
 
 def print_victory(victory_type):
-    pass #TODO
+    string = f"{victory_type[0]} wins by way of the {victory_type[1]}"
+    print("\n"+len(string)*"="+f"\n{string}\n"+len(string)*"="+"\n")
+    return
 
 # Updates the board state by executing a move
 def execute_move(board, move, card):
@@ -156,16 +175,18 @@ def execute_move(board, move, card):
 
 # Returns type of victory attained in a given board state, None if the game is not won.
 def is_won(board):
-    if board.positions[0] == (2,0): return ("RED", "WIND")
-    elif board.positions[5] == (2,4): return ("BLUE", "WIND")
-    elif board.positions[0] == (-1,-1): return ("BLUE", "ROCK")
-    elif board.positions[5] == (-1,-1): return ("RED", "ROCK")
+    if board.positions[0] == (2,0): return ("RED", "STREAM")
+    elif board.positions[5] == (2,4): return ("BLUE", "STREAM")
+    elif board.positions[0] == (-1,-1): return ("BLUE", "STONE")
+    elif board.positions[5] == (-1,-1): return ("RED", "STONE")
     else: return None
 
 # Main game loop for two player mode
 def two_player_mode():
 
     board = initialise_board() # Set initial boardstate
+
+    print("GAME BEGINS\n")
 
     while True: # Main game loop
 
@@ -190,10 +211,10 @@ def two_player_mode():
 
         while True: # Loop to request and verify player's move
 
-            move_input = input("Move a piece by typing it's starting and ending coords: \"a1b2\".\n") # Take input on desired move
+            move_input = input("Move a piece: ") # Take input on desired move
 
             # Check regex match
-            if not re.match("[a-e]\d[a-e]\d", move_input): 
+            if not re.match("[a-z]\d[a-z]\d", move_input): 
                 print("Could not parse input.")
                 continue
 
@@ -214,26 +235,26 @@ def two_player_mode():
             
             # Check input moves a friendly piece
             if move[0] not in pieces: 
-                print("Coordinate does not specify a friendly piece.")
+                print("Coordinates do not specify a friendly piece.")
+                continue
+
+            resultant_move = (-mul*move[1][0]+mul*move[0][0],mul*move[1][1]-mul*move[0][1]) # Convert move to notation used in cards
+
+            # Check move is described by a card in hand
+            if  resultant_move not in cards[0].moves and resultant_move not in cards[1].moves: 
+                print("Move not in hand.")
                 continue
 
             # Check input does not capture a friendly piece
             if move[1] in pieces:
-                print("Move cannot land on a friendly piece.")
-                continue
-
-            resultant_move = (mul*move[1][0]-mul*move[0][0],mul*move[1][1]-mul*move[0][1]) # Convert move to notation used in cards
-
-            # Check move is described by a card in hand
-            if  resultant_move not in cards[0].moves and resultant_move not in cards[1].moves: 
-                print("Move not in current hand.")
+                print("Move cannot capture a friendly piece.")
                 continue
 
             # Handle extra response when move is possible with either card
             if resultant_move in cards[0].moves and resultant_move in cards[1].moves: 
                 
                 while True: # Loop to specify desired card
-                    response = input("Move is possible with either card. Name the desired card.\n")
+                    response = input("Move is possible with either card. Name the desired card: ")
 
                     # Check that response is a card in the player's hand
                     if response != cards[0].name and response != cards[1].name:

@@ -15,24 +15,21 @@ class CARD:
     def matrix(self):
 
         # Initialise matrix for containing possible moves
-        matrix = [[".",".",".",".","."] for i in range(5)]
-        matrix[2][2] = "@"
+        matrix = [[" "," "," "," "," "] for i in range(4)]
+        matrix[1][2] = "@"
         
         # Loop through moves, replace corresponsing matrix entry with "#"
         for move in self.moves:
-            matrix[move[1]+2][move[0]+2] = "#"
+            matrix[move[1]+1][move[0]+2] = "#"
 
-        space = ""
+        space = " "
 
         full_matrix = [
-            " --------- ",
-            f"|{self.name}"+(9-len(self.name))*" "+"|",
+            (9-len(self.name))//2*" "+f"{self.name}"+-(-(9-len(self.name))//2)*" ",
         ]
 
-        for i in range(5):
-            full_matrix.append("|    "+f"{space.join(matrix[i])}"+"|")
-        
-        full_matrix.append(" --------- ")
+        for i in range(4):
+            full_matrix.append(f"{space.join(matrix[i])}")
         
         return full_matrix
 
@@ -69,15 +66,14 @@ class BOARD:
             else: matrix[piece[1]][piece[0]] = "b"
         
         full_matrix = [
-            "   0   1   2   3   4  ",
-            " +---+---+---+---+---+",
+            "+---+---+---+---+---+",
         ]
 
         bar = " | " # Prepare string to make f string list join work
 
         for i in range(5):
-            full_matrix.append(f"{i}| {bar.join(matrix[i])} |")
-            full_matrix.append(" +---+---+---+---+---+")
+            full_matrix.append(f"| {bar.join(matrix[i])} |")
+            full_matrix.append("+---+---+---+---+---+")
         
         return full_matrix
 
@@ -96,19 +92,48 @@ def initialise_board():
 
 def print_board(board):
 
+    # Prepare the move matrix for each card in play, to be displayed
     matrix0 = board.cards[0].matrix()
     matrix1 = board.cards[1].matrix()
     matrix2 = board.cards[2].matrix()
     matrix3 = board.cards[3].matrix()
+    matrix4 = board.cards[4].matrix()
 
-    for i in range(8):
-        print(f"{matrix3[i]} {matrix2[i]}")
+    if board.turn % 2 == 0: # Red's turn
 
-    for row in board.matrix():
-        print(row)
+        for i in range(5): # Prints Blue's cards
+            print(f" {matrix3[i]}   {matrix2[i]} ")
 
-    for i in range(8):
-        print(f"{matrix0[7-i]} {matrix1[7-i]}")
+        # Prints play area
+        for num, row in enumerate(board.matrix()): # Prints row numbers
+            print(" ", end = "") if num%2 == 0 else print(num//2, end = "") 
+
+            # Prints rows from board matrix, followed by 4th card for central rows
+            if 3 <= num and num <= 7: 
+                print(f"{row} {matrix4[7-num]}")
+            else: print(f"{row}")
+        print("   a   b   c   d   e  ")
+
+        for i in range(5): # Prints Red's cards
+            print(f" {matrix0[4-i]}   {matrix1[4-i]} ")
+
+    else:   # Blue's turn
+
+        for i in range(5): # Prints Red's cards
+            print(f" {matrix1[i]}   {matrix0[i]} ")
+
+        # Prints play area
+        for num, row in enumerate(reversed(board.matrix())): # Prints row numbers
+            print(" ", end = "") if num%2 == 0 else print(4-(num//2), end = "") 
+            
+            # Prints rows from board matrix, followed by 4th card for central rows
+            if 3 <= num and num <= 7:
+                print(f"{row[::-1]} {matrix4[7-num]}")
+            else: print(f"{row[::-1]}")
+        print("   e   d   c   b   a  ")
+
+        for i in range(5): # Prints Blue's cards
+            print(f" {matrix2[4-i]}   {matrix3[4-i]} ")
 
 def print_victory(victory_type):
     pass #TODO
@@ -156,23 +181,29 @@ def two_player_mode():
             print("RED's turn.")
             pieces = board.positions[0:5] # Red's Master and Students
             cards = board.cards[0:2] # Red's cards
-            ymul = -1 # Multiplier reverses y-axis for given moves
+            mul = -1 # Multiplier reverses both axes for given moves
         else: 
             print("BLUE's turn.")
             pieces = board.positions[5:10] # Blue's Master and Students
             cards = board.cards[2:4] # Blue's  cards
-            ymul = 1 # Multiplier does not reverse y-axis for given moves
+            mul = 1 # Multiplier does not reverse axes
 
         while True: # Loop to request and verify player's move
 
-            move_input = input("Move a piece by typing it's starting and ending coords: \"(x0,y0) (x1,y1)\".\n") # Take input on desired move
+            move_input = input("Move a piece by typing it's starting and ending coords: \"a1b2\".\n") # Take input on desired move
 
             # Check regex match
-            if not re.match("\(\d,\d\) \(\d,\d\)", move_input): 
+            if not re.match("[a-e]\d[a-e]\d", move_input): 
                 print("Could not parse input.")
                 continue
 
-            ints = [int(x) for x in re.findall("\d", move_input)] # Regex pull digits
+            # Parse input to list of integers
+            ints = []
+            for num, char in enumerate(move_input):
+                if num%2 == 0: # Parse letters
+                    ints.append(ord(char)-97)
+                else:          # Parse digits
+                    ints.append(int(char))
 
             # Check coordinates are on the board
             if len(ints) != 4 or any(x not in range(5) for x in ints): 
@@ -191,7 +222,7 @@ def two_player_mode():
                 print("Move cannot land on a friendly piece.")
                 continue
 
-            resultant_move = (move[1][0]-move[0][0],ymul*move[1][1]-ymul*move[0][1]) # Convert move to notation used in cards
+            resultant_move = (mul*move[1][0]-mul*move[0][0],mul*move[1][1]-mul*move[0][1]) # Convert move to notation used in cards
 
             # Check move is described by a card in hand
             if  resultant_move not in cards[0].moves and resultant_move not in cards[1].moves: 

@@ -1,8 +1,11 @@
 import random
 import re
 
+# Initial postitions for a typical game
+INITIAL_POSITIONS = [(2,4),(0,4),(1,4),(3,4),(4,4),(2,0),(0,0),(1,0),(3,0),(4,0)]
+
 # Card class represents a card in Onitama
-class CARD:
+class Card:
     def __init__(self, name, stamp, moves):
         self.name = name
         self.stamp = stamp
@@ -33,12 +36,34 @@ class CARD:
         
         return full_matrix
 
+# The Deck contains all cards in Onitama
+DECK = [
+    Card('tiger', 'blue', [(0,2), (0,-1)]),
+    Card('monkey', 'blue', [(1,1),(-1,1),(-1,-1),(1,-1)]),
+    Card('dragon', 'red', [(2,1),(-2,1),(-1,-1),(1,-1)]),
+    Card('crab', 'blue', [(2,0),(-2,0),(0,1)]),
+    Card('mantis', 'red', [(1,1),(-1,1),(0,-1)]),
+    Card('frog', 'red', [(-2,0),(-1,1),(1,-1)]),
+    Card('elephant', 'red', [(-1,0),(-1,1),(1,1),(1,0)]),
+    Card('rooster', 'red', [(-1,0),(-1,-1),(1,1),(1,0)]),
+    Card('boar', 'red', [(-1,0),(0,1),(1,0)]),
+    Card('ox', 'blue', [(1,0),(0,-1),(0,1)]),
+    Card('crane', 'blue', [(1,-1),(-1,-1),(0,1)]),
+    Card('eel', 'blue', [(-1,1),(-1,-1),(1,0)]),
+    Card('horse', 'red', [(-1,0),(0,-1),(0,1)]),
+    Card('cobra', 'red', [(1,1),(1,-1),(-1,0)]),
+    Card('goose', 'blue', [(-1,0),(-1,1),(1,-1),(1,0)]),
+    Card('rabbit', 'blue', [(2,0),(1,1),(-1,-1)])
+]
+
 # The Board class represents a gamestate
-class BOARD:
-    def __init__(self, turn, positions, cards):
-        self.turn = turn
+class Board:
+    def __init__(self, turn=None, positions=INITIAL_POSITIONS, cards=random.sample(DECK,5)):
         self.positions = positions
         self.cards = cards
+        if turn is None:
+            self.turn = 0 if cards[4].stamp == "red" else 1  # Set game to start on turn 0 or 1 depending on whether RED or BLUE start respectively
+        else: self.turn = turn
 
     def turn_colour(self):
         return "RED" if self.turn % 2 == 0 else "BLUE"
@@ -196,43 +221,6 @@ class BOARD:
         s += "\n"
         return s
 
-
-# The Deck contains all cards in Onitama
-DECK = [
-    CARD('tiger', 'blue', [(0,2), (0,-1)]),
-    CARD('monkey', 'blue', [(1,1),(-1,1),(-1,-1),(1,-1)]),
-    CARD('dragon', 'red', [(2,1),(-2,1),(-1,-1),(1,-1)]),
-    CARD('crab', 'blue', [(2,0),(-2,0),(0,1)]),
-    CARD('mantis', 'red', [(1,1),(-1,1),(0,-1)]),
-    CARD('frog', 'red', [(-2,0),(-1,1),(1,-1)]),
-    CARD('elephant', 'red', [(-1,0),(-1,1),(1,1),(1,0)]),
-    CARD('rooster', 'red', [(-1,0),(-1,-1),(1,1),(1,0)]),
-    CARD('boar', 'red', [(-1,0),(0,1),(1,0)]),
-    CARD('ox', 'blue', [(1,0),(0,-1),(0,1)]),
-    CARD('crane', 'blue', [(1,-1),(-1,-1),(0,1)]),
-    CARD('eel', 'blue', [(-1,1),(-1,-1),(1,0)]),
-    CARD('horse', 'red', [(-1,0),(0,-1),(0,1)]),
-    CARD('cobra', 'red', [(1,1),(1,-1),(-1,0)]),
-    CARD('goose', 'blue', [(-1,0),(-1,1),(1,-1),(1,0)]),
-    CARD('rabbit', 'blue', [(2,0),(1,1),(-1,-1)])
-]
-
-# Initial postitions for a typical game
-INITIAL_POSITIONS = [(2,4),(0,4),(1,4),(3,4),(4,4),(2,0),(0,0),(1,0),(3,0),(4,0)]
-
-# Returns a board object representing the beginning of an Onitama game. Cards are randomly selected from the Deck
-def initialise_board():
-
-    cards = [] # List of cards
-
-    while len(cards)<5: # Choose 5 different random cards from the deck
-        num = random.randint(0,len(DECK)-1)
-        if DECK[num] not in cards: cards.append(DECK[num])
-
-    turn = 0 if cards[4].stamp == "red" else 1 # Set game to start on turn 0 or 1 depending on whether RED or BLUE start respectively
-
-    return BOARD(turn, INITIAL_POSITIONS, cards)
-
 def print_victory(victory_type):
     string = f"{victory_type[0]} wins by way of the {victory_type[1]}"
     print("\n"+len(string)*"="+f"\n{string}\n"+len(string)*"="+"\n")
@@ -272,11 +260,16 @@ def request_move(board):
 # Main game loop for two player mode
 def two_player_mode():
 
-    print("Two player mode.\n")
-    print("Usage: input move by typing start and end coordinates: \'a1b2\'\nYou may be asked to specify a card. In this case, name the desired card: \'pigeon\'\n")
-    print("GAME BEGINS\n")
+    print(
+'''Two player mode.
 
-    board = initialise_board() # Set initial boardstate
+Usage: input move by typing start and end coordinates: \'a1b2\'
+You may be asked to specify a card. In this case, name the desired card: \'pigeon\'
+
+GAME BEGINS
+''')
+
+    board = Board() # Set initial boardstate
 
     while True: # Main game loop
 

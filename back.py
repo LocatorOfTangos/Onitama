@@ -1,15 +1,16 @@
 import random
 import re
+from random_bot import *
 
 # Initial postitions for a typical game
 INITIAL_POSITIONS = [(2,4),(0,4),(1,4),(3,4),(4,4),(2,0),(0,0),(1,0),(3,0),(4,0)]
 
 # Card class represents a card in Onitama
 class Card:
-    def __init__(self, name, stamp, moves):
+    def __init__(self, name, stamp, card_moves):
         self.name = name
         self.stamp = stamp
-        self.moves = moves
+        self.card_moves = card_moves
         self.matrix = self.create_matrix()
 
     def create_matrix(self):
@@ -19,8 +20,8 @@ class Card:
         matrix[1][2] = "@"
         
         # Loop through moves, replace corresponsing matrix entry with "#"
-        for move in self.moves:
-            matrix[move[1]+1][move[0]+2] = "#"
+        for card_move in self.card_moves:
+            matrix[card_move[1]+1][card_move[0]+2] = "#"
 
         # Initialise full_matrix with first line (spaced card name)
         full_matrix = [
@@ -113,10 +114,10 @@ class Board:
             print("Coordinates do not specify a friendly piece.")
             return None
 
-        resultant_move = (-mul*move[1][0]+mul*move[0][0],mul*move[1][1]-mul*move[0][1]) # Convert move to notation used in cards
+        card_move = (-mul*move[1][0]+mul*move[0][0],mul*move[1][1]-mul*move[0][1]) # Convert move to notation used in cards
 
         # Check move is described by a card in hand
-        if  resultant_move not in cards[0].moves and resultant_move not in cards[1].moves: 
+        if  card_move not in cards[0].card_moves and card_move not in cards[1].card_moves: 
             print("Move not in hand.")
             return None
 
@@ -126,7 +127,7 @@ class Board:
             return None
 
         # Handle extra response when move is possible with either card
-        if resultant_move in cards[0].moves and resultant_move in cards[1].moves: 
+        if card_move in cards[0].card_moves and card_move in cards[1].card_moves: 
             
             while True: # Loop to specify desired card
                 response = input("Move is possible with either card. Name the desired card: ")
@@ -136,15 +137,18 @@ class Board:
 
                 print("That is not the name of one of your cards.")
 
+
             # Record card used
             if response == cards[0].name: card_used = 0
             else: card_used = 1
-            return (move, cards[card_used])
+            move.append(cards[card_used])
+            return move
 
         # Record card used
-        if resultant_move in cards[0].moves: card_used = 0
+        if card_move in cards[0].card_moves: card_used = 0
         else: card_used = 1
-        return (move, cards[card_used])
+        move.append(cards[card_used])
+        return move
 
     # Updates the board state by executing a move
     def execute_move(self, move):
@@ -152,15 +156,15 @@ class Board:
         self.turn += 1 # Increments turn count
 
         # Swaps used card with waiting card
-        self.cards[self.cards.index(move[1])] = self.cards[4]
-        self.cards[4] = move[1]
+        self.cards[self.cards.index(move[2])] = self.cards[4]
+        self.cards[4] = move[2]
 
         # Captures enemy piece, if it exists
-        try: self.positions[self.positions.index(move[0][1])] = (-1,-1)
+        try: self.positions[self.positions.index(move[1])] = (-1,-1)
         except ValueError: pass
 
         # Updates piece's position
-        self.positions[self.positions.index(move[0][0])] = move[0][1]
+        self.positions[self.positions.index(move[0])] = move[1]
 
     # Returns type of victory attained in a given board state, None if the game is not won.
     def is_won(self):
@@ -218,8 +222,33 @@ class Board:
 
             for i in range(5): # Prints Blue's cards
                 s += f" {matrix2[4-i]}   {matrix3[4-i]} \n"
-        s += "\n"
         return s
+
+    def possible_moves(self):
+        if self.turn_colour() == "RED":
+            current_cards = self.cards[0:2] 
+            current_pieces = self.positions[0:5]
+            mul = -1
+        else:
+            current_cards = self.cards[2:4] 
+            current_pieces = self.positions[5:10]
+            mul = 1
+
+        possible_moves = []
+        for piece_num, position in enumerate(current_pieces):
+            if position == (-1,-1): continue
+
+            for card in current_cards:
+
+                for card_move in card.card_moves:
+
+                    destination = (position[0] - mul*card_move[0], mul*card_move[1] + position[1])
+
+                    if destination[0] not in range(5) or destination[1] not in range(5) or destination in current_pieces: continue
+                    possible_moves.append([position,destination,card])
+
+        return possible_moves
+                    
 
 def print_victory(victory_type):
     string = f"{victory_type[0]} wins by way of the {victory_type[1]}"
@@ -252,7 +281,7 @@ def request_move(board):
         
         # Parses raw_move_coords to coordinate notation used everywhere else
         move_coords = [ (raw_move_coords[0], raw_move_coords[1]), (raw_move_coords[2], raw_move_coords[3]) ] 
-        
+
         move = board.validate_move(move_coords)
 
         if move: return move
@@ -267,7 +296,7 @@ Usage: input move by typing start and end coordinates: \'a1b2\'
 You may be asked to specify a card. In this case, name the desired card: \'pigeon\'
 
 GAME BEGINS
-''')
+'''      )
 
     board = Board() # Set initial boardstate
 
@@ -290,10 +319,46 @@ GAME BEGINS
         # Update boardstate by executing move
         board.execute_move(move)
 
-# Main function
-def start():
-    print("\nWelcome to ONITAMA\n")
-    two_player_mode()
+def random_bot_mode():
+    player_colour = "RED" if random.randint(0,1) == 0 else "BLUE"
+
+    print(
+f'''Random bot mode.
+
+Usage: input move by typing start and end coordinates: \'a1b2\'
+You may be asked to specify a card. In this case, name the desired card: \'pigeon\'
+
+You are {player_colour}.
+
+GAME BEGINS
+'''      )
+
+    board = Board() # Set initial boardstate
+
+    while True: # Main game loop
+
+        print(board) # Print boardstate at beginning of any turn
+
+        # Check if the board is won, end game if so
+        victory_type = board.is_won()
+        if victory_type:
+            print_victory(victory_type) # Print victory information
+            return
+
+        # Print who's turn it is
+        print(f"{board.turn_colour()}\'s turn.")
+
+        # Request a move
+        if board.turn_colour() == player_colour:
+            move = request_move(board)
+        else:
+            move = request_bot_move(board)
+            print('Bot plays: ',chr(move[0][0]+97),move[0][1],chr(move[1][0]+97),move[1][1], sep = '')
+
+        # Update boardstate by executing move
+        board.execute_move(move)
 
 if __name__ == "__main__":
-    start()
+    print("\nWelcome to ONITAMA\n")
+    response = input("Enter 1 to play locally, 2 to play a bot: ")
+    two_player_mode() if response == '1' else random_bot_mode()

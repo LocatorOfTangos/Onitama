@@ -174,6 +174,15 @@ class Board:
         elif self.positions[5] == (-1,-1): return ("RED", "STONE")
         else: return None
 
+    # Returns subjective game stage evaluation
+    def game_stage(self):
+        num_red_students = len([1 for student in self.positions[1:5] if student != (-1,-1)])
+        num_blue_students = len([1 for student in self.positions[6:10] if student != (-1,-1)])
+        min_students = min(num_red_students,num_blue_students)
+        if min_students >= 4: return "OPENING"
+        elif min_students >= 2: return "MIDGAME"
+        else: return "ENDGAME"
+
     # returns a string representation of the board that is pretty
     def __str__(self):
 
@@ -224,6 +233,7 @@ class Board:
                 s += f" {matrix2[4-i]}   {matrix3[4-i]} \n"
         return s
 
+    # Returns a list of legal moves given a position.
     def possible_moves(self):
         if self.turn_colour() == "RED":
             current_cards = self.cards[0:2] 
@@ -248,8 +258,71 @@ class Board:
                     possible_moves.append([position,destination,card])
 
         return possible_moves
-                    
 
+    # A simple evaluation function. A positive score favours RED, a negative score favours BLUE
+    def evaluate_position(self):
+        # Return large evaluation for won positions
+        try: return 300 if self.is_won()[0] == "RED" else -300
+        except: pass
+
+        score = 0
+
+        # Prioritise the center and add piece values
+        for piece in self.positions[1:5]:
+            if piece != (-1,-1): score += (CENTER_PRIORITY[piece[0]][piece[1]] + STUDENT_VALUE)
+        for piece in self.positions[6:10]:
+            if piece != (-1,-1): score -= (CENTER_PRIORITY[piece[0]][piece[1]] + STUDENT_VALUE)
+
+        # Evaluate master positioning
+        game_stage = self.game_stage()
+        if game_stage == "OPENING":
+            score += OPENING_MASTER_POSITIONAL_VALUE[self.positions[0][0]][self.positions[0][1]]
+            score -= OPENING_MASTER_POSITIONAL_VALUE[4-self.positions[5][0]][4-self.positions[5][1]]
+        elif game_stage == "MIDGAME":
+            score += MIDGAME_MASTER_POSITIONAL_VALUE[self.positions[0][0]][self.positions[0][1]]
+            score -= MIDGAME_MASTER_POSITIONAL_VALUE[4-self.positions[5][0]][4-self.positions[5][1]]
+        else:
+            score += ENDGAME_MASTER_POSITIONAL_VALUE[self.positions[0][0]][self.positions[0][1]]
+            score -= ENDGAME_MASTER_POSITIONAL_VALUE[4-self.positions[5][0]][4-self.positions[5][1]]    
+
+        return score
+            
+CENTER_PRIORITY = [
+    [-10,0,10,0,-10],
+    [0,10,20,10,0],
+    [10,20,30,20,10],
+    [0,10,20,10,0],
+    [-10,0,10,0,-10]
+]
+
+OPENING_MASTER_POSITIONAL_VALUE = [
+    [0,10,-20,-60,-100],
+    [0,10,-20,-60,-100],
+    [0,10,-20,-60,-100],
+    [0,10,-20,-60,-100],
+    [0,10,-20,-60,-100]
+]
+
+MIDGAME_MASTER_POSITIONAL_VALUE = [
+    [-20,0,0,-40,-80],
+    [-20,0,0,-40,-80],
+    [-20,0,0,-40,-80],
+    [-20,0,0,-40,-80],
+    [-20,0,0,-40,-80]
+]
+
+ENDGAME_MASTER_POSITIONAL_VALUE = [
+    [-100,-60,20,60,40],
+    [-100,-60,20,80,100],
+    [-100,-60,20,100,100],
+    [-100,-60,20,80,100],
+    [-100,-60,20,60,40]
+]
+
+
+STUDENT_VALUE = 50
+
+                
 def print_victory(victory_type):
     string = f"{victory_type[0]} wins by way of the {victory_type[1]}"
     print("\n"+len(string)*"="+f"\n{string}\n"+len(string)*"="+"\n")
@@ -312,6 +385,7 @@ GAME BEGINS
 
         # Print who's turn it is
         print(f"{board.turn_colour()}\'s turn.")
+        print(f"eval = {board.evaluate_position()}")
 
         # Request a move
         move = request_move(board)

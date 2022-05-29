@@ -1,7 +1,6 @@
 import random
 import re
-from random_bot import request_random_bot_move
-from minimax_bot import request_minimax_bot_move
+import copy
 
 # Initial postitions for a typical game
 INITIAL_POSITIONS = [(2,0),(0,0),(1,0),(3,0),(4,0),(2,4),(0,4),(1,4),(3,4),(4,4)]
@@ -177,7 +176,7 @@ class Board:
         self.turn += 1 # Increments turn count
 
         # Swaps used card with waiting card
-        self.cards[self.cards.index(move[2])] = self.cards[4]
+        self.cards[[card.name for card in self.cards].index(move[2].name)] = self.cards[4]
         self.cards[4] = move[2]
 
         # Captures enemy piece, if it exists
@@ -283,7 +282,7 @@ class Board:
     # A simple evaluation function. A positive score favours RED, a negative score favours BLUE
     def evaluate_position(self):
         # Return large evaluation for won positions
-        try: return 300 if self.is_won()[0] == "RED" else -300
+        try: return 1000 if self.is_won()[0] == "RED" else -1000
         except: pass
 
         score = 0
@@ -379,6 +378,31 @@ def request_move(board):
 
         if move: return move
 
+def request_random_bot_move(board):
+
+    possible_moves = board.possible_moves()
+    
+    return random.sample(possible_moves,1)[0]
+
+def request_shortsighted_bot_move(board):
+
+    possible_moves = board.possible_moves()
+
+    for pos, move in enumerate(possible_moves):
+        simulation_board = copy.deepcopy(board)
+        simulation_board.execute_move(move)
+        possible_countermoves = simulation_board.possible_moves()
+        worst_outcome = 300
+        for move in possible_countermoves:
+            simsimulation_board = copy.deepcopy(simulation_board)
+            simsimulation_board.execute_move(move)
+            evaluation = simsimulation_board.evaluate_position()
+            if evaluation < worst_outcome: worst_outcome = evaluation
+        possible_moves[pos].append(worst_outcome)
+    
+    return random.sample([possible_move[:-1] for possible_move in possible_moves if possible_move[-1] == max([possible_move[-1] for possible_move in possible_moves])],1)[0]
+
+
 # Main game loop for two player mode
 def two_player_mode():
 
@@ -452,11 +476,11 @@ GAME BEGINS
         # Update boardstate by executing move
         board.execute_move(move)
 
-def minimax_bot_mode():
+def shortsighted_bot_mode():
     player_colour = "BLUE"
 
     print(
-f'''minimax bot mode.
+f'''shortsighted bot mode.
 
 Usage: input move by typing start and end coordinates: \'a1b2\'
 You may be asked to specify a card. In this case, name the desired card: \'pigeon\'
@@ -485,7 +509,7 @@ GAME BEGINS
         if board.turn_colour() == player_colour:
             move = request_move(board)
         else:
-            move = request_minimax_bot_move(board)
+            move = request_shortsighted_bot_move(board)
             print('Bot plays: ',chr(101-move[0][0]),move[0][1],chr(101-move[1][0]),move[1][1], sep = '')
 
         # Update boardstate by executing move
@@ -493,6 +517,7 @@ GAME BEGINS
 
 if __name__ == "__main__":
     print("\nWelcome to ONITAMA\n")
-    response = input("Enter 1 to play locally, 2 to play a bot: ")
+    response = input("Enter 1 to play locally, 2 to play a random bot, 3 to play a shortsighted bot: ")
     if response == '1': two_player_mode() 
     elif response == '2': random_bot_mode()
+    elif response == '3': shortsighted_bot_mode()

@@ -5,8 +5,14 @@ from random_bot import *
 # Initial postitions for a typical game
 INITIAL_POSITIONS = [(2,4),(0,4),(1,4),(3,4),(4,4),(2,0),(0,0),(1,0),(3,0),(4,0)]
 
-# Card class represents a card in Onitama
 class Card:
+    '''
+    Card class represents a card in Onitama.
+
+    Methods:
+        create_matrix()     - Creates list-of-lists card representation that prints elegantly
+    '''
+
     def __init__(self, name, stamp, card_moves):
         self.name = name
         self.stamp = stamp
@@ -59,6 +65,21 @@ DECK = [
 
 # The Board class represents a gamestate
 class Board:
+    '''
+    Board class represents a board state in Onitama.
+
+    Methods:
+        turn_colour()                   - Returns 'RED' or 'BLUE' depending on player turn
+        create_matrix()                 - Creates list-of-lists representation of the board that prints elegantly
+        validate_move(move_coords)      - Returns None and prints cause of invalidity for invalid moves coordinates. Requests user input if card used is ambiguous, and returns move if valid
+        execute_move(move)              - Updates the board object by executing a given move
+        is_won()                        - Returns None if game is not won, else returns win type
+        game_stage()                    - Returns 'OPENING', 'MIDGAME', or 'ENDGAME' depending on game stage
+        __str__()                       - Returns string representation of the playing area that prints elegantly
+        possible_moves()                - Returns list of possible moves
+        evaluate_position()             - Returns minimax-style position evaluation
+    '''
+
     def __init__(self, turn=None, positions=INITIAL_POSITIONS, cards=random.sample(DECK,5)):
         self.positions = positions
         self.cards = cards
@@ -69,7 +90,7 @@ class Board:
     def turn_colour(self):
         return "RED" if self.turn % 2 == 0 else "BLUE"
 
-    def matrix(self):
+    def create_matrix(self):
 
         # Initialise matrix for containing piece locations
         matrix = [[" "," "," "," "," "] for i in range(5)]
@@ -98,7 +119,7 @@ class Board:
         
         return full_matrix
 
-    def validate_move(self, move):
+    def validate_move(self, move_coords):
 
         if self.turn % 2 == 0: 
             pieces = self.positions[0:5] # Red's Master and Students
@@ -110,44 +131,43 @@ class Board:
             mul = 1 # Multiplier does not reverse axes
 
         # Check input moves a friendly piece
-        if move[0] not in pieces: 
+        if move_coords[0] not in pieces: 
             print("Coordinates do not specify a friendly piece.")
             return None
 
-        card_move = (-mul*move[1][0]+mul*move[0][0],mul*move[1][1]-mul*move[0][1]) # Convert move to notation used in cards
+        card_move = (-mul*move_coords[1][0]+mul*move_coords[0][0],mul*move_coords[1][1]-mul*move_coords[0][1]) # Convert move_coords to notation used in cards
 
-        # Check move is described by a card in hand
+        # Check card_move is described by a card in hand
         if  card_move not in cards[0].card_moves and card_move not in cards[1].card_moves: 
             print("Move not in hand.")
             return None
 
-        # Check input does not capture a friendly piece
-        if move[1] in pieces:
+        # Check move_coords do not capture a friendly piece
+        if move_coords[1] in pieces:
             print("Move cannot capture a friendly piece.")
             return None
 
-        # Handle extra response when move is possible with either card
+        # Handle extra response when card_move is possible with either card
         if card_move in cards[0].card_moves and card_move in cards[1].card_moves: 
             
             while True: # Loop to specify desired card
                 response = input("Move is possible with either card. Name the desired card: ")
 
-                # Check that response is a card in the player's hand
+                # Check that response names a card in the player's hand
                 if response == cards[0].name or response == cards[1].name: break
 
                 print("That is not the name of one of your cards.")
 
-
             # Record card used
             if response == cards[0].name: card_used = 0
             else: card_used = 1
-            move.append(cards[card_used])
+            move = move_coords + [cards[card_used]]
             return move
 
         # Record card used
         if card_move in cards[0].card_moves: card_used = 0
         else: card_used = 1
-        move.append(cards[card_used])
+        move = move_coords + [cards[card_used]]
         return move
 
     # Updates the board state by executing a move
@@ -202,7 +222,7 @@ class Board:
                 s += f" {matrix3[i]}   {matrix2[i]} \n" if i == 0 else f" {matrix3[i][::-1]}   {matrix2[i][::-1]} \n"
 
             # Prints play area
-            for num, row in enumerate(self.matrix()): # Prints row numbers
+            for num, row in enumerate(self.create_matrix()): # Prints row numbers
                 s += " " if num%2 == 0 else str(num//2)
 
                 # Prints rows from self matrix, followed by 4th card for central rows
@@ -220,7 +240,7 @@ class Board:
                 s += f" {matrix1[i]}   {matrix0[i]} \n" if i == 0 else f" {matrix1[i][::-1]}   {matrix0[i][::-1]} \n"
 
             # Prints play area
-            for num, row in enumerate(reversed(self.matrix())): # Prints row numbers
+            for num, row in enumerate(reversed(self.create_matrix())): # Prints row numbers
                 s += " " if num%2 == 0 else str(4-(num//2)) 
                 
                 # Prints rows from self matrix, followed by 4th card for central rows
@@ -245,7 +265,7 @@ class Board:
             mul = 1
 
         possible_moves = []
-        for piece_num, position in enumerate(current_pieces):
+        for position in current_pieces:
             if position == (-1,-1): continue
 
             for card in current_cards:
@@ -318,7 +338,6 @@ ENDGAME_MASTER_POSITIONAL_VALUE = [
     [-100,-60,20,80,100],
     [-100,-60,20,60,40]
 ]
-
 
 STUDENT_VALUE = 50
 
@@ -435,4 +454,5 @@ GAME BEGINS
 if __name__ == "__main__":
     print("\nWelcome to ONITAMA\n")
     response = input("Enter 1 to play locally, 2 to play a bot: ")
-    two_player_mode() if response == '1' else random_bot_mode()
+    if response == '1': two_player_mode() 
+    elif response == '2': random_bot_mode()

@@ -1,6 +1,7 @@
 import random
 import re
-from random_bot import *
+from random_bot import request_random_bot_move
+from minimax_bot import request_minimax_bot_move
 
 # Initial postitions for a typical game
 INITIAL_POSITIONS = [(2,0),(0,0),(1,0),(3,0),(4,0),(2,4),(0,4),(1,4),(3,4),(4,4)]
@@ -445,7 +446,46 @@ GAME BEGINS
         if board.turn_colour() == player_colour:
             move = request_move(board)
         else:
-            move = request_bot_move(board)
+            move = request_random_bot_move(board)
+            print('Bot plays: ',chr(101-move[0][0]),move[0][1],chr(101-move[1][0]),move[1][1], sep = '')
+
+        # Update boardstate by executing move
+        board.execute_move(move)
+
+def minimax_bot_mode():
+    player_colour = "BLUE"
+
+    print(
+f'''minimax bot mode.
+
+Usage: input move by typing start and end coordinates: \'a1b2\'
+You may be asked to specify a card. In this case, name the desired card: \'pigeon\'
+
+You are BLUE.
+
+GAME BEGINS
+'''      )
+
+    board = Board() # Set initial boardstate
+
+    while True: # Main game loop
+
+        print(board) # Print boardstate at beginning of any turn
+
+        # Check if the board is won, end game if so
+        victory_type = board.is_won()
+        if victory_type:
+            print_victory(victory_type) # Print victory information
+            return
+
+        # Print who's turn it is
+        print(f"{board.turn_colour()}\'s turn.")
+
+        # Request a move
+        if board.turn_colour() == player_colour:
+            move = request_move(board)
+        else:
+            move = request_minimax_bot_move(board)
             print('Bot plays: ',chr(101-move[0][0]),move[0][1],chr(101-move[1][0]),move[1][1], sep = '')
 
         # Update boardstate by executing move

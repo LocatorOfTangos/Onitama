@@ -3,7 +3,7 @@ import re
 from random_bot import *
 
 # Initial postitions for a typical game
-INITIAL_POSITIONS = [(2,4),(0,4),(1,4),(3,4),(4,4),(2,0),(0,0),(1,0),(3,0),(4,0)]
+INITIAL_POSITIONS = [(2,0),(0,0),(1,0),(3,0),(4,0),(2,4),(0,4),(1,4),(3,4),(4,4)]
 
 class Card:
     '''
@@ -124,11 +124,11 @@ class Board:
         if self.turn % 2 == 0: 
             pieces = self.positions[0:5] # Red's Master and Students
             cards = self.cards[0:2] # Red's cards
-            mul = -1 # Multiplier reverses both axes for given moves
+            mul = 1 # Multiplier reverses both axes for given moves
         else: 
             pieces = self.positions[5:10] # Blue's Master and Students
             cards = self.cards[2:4] # Blue's  cards
-            mul = 1 # Multiplier does not reverse axes
+            mul = -1 # Multiplier does not reverse axes
 
         # Check input moves a friendly piece
         if move_coords[0] not in pieces: 
@@ -188,8 +188,8 @@ class Board:
 
     # Returns type of victory attained in a given board state, None if the game is not won.
     def is_won(self):
-        if self.positions[0] == (2,0): return ("RED", "STREAM")
-        elif self.positions[5] == (2,4): return ("BLUE", "STREAM")
+        if self.positions[0] == (2,4): return ("RED", "STREAM")
+        elif self.positions[5] == (2,0): return ("BLUE", "STREAM")
         elif self.positions[0] == (-1,-1): return ("BLUE", "STONE")
         elif self.positions[5] == (-1,-1): return ("RED", "STONE")
         else: return None
@@ -222,13 +222,13 @@ class Board:
                 s += f" {matrix3[i]}   {matrix2[i]} \n" if i == 0 else f" {matrix3[i][::-1]}   {matrix2[i][::-1]} \n"
 
             # Prints play area
-            for num, row in enumerate(self.create_matrix()): # Prints row numbers
-                s += " " if num%2 == 0 else str(num//2)
-
+            for num, row in enumerate(reversed(self.create_matrix())): # Prints row numbers
+                s += " " if num%2 == 0 else str(4-(num//2)) 
+                
                 # Prints rows from self matrix, followed by 4th card for central rows
-                if 3 <= num and num <= 7: 
-                    s += f"{row} {matrix4[7-num]}\n"
-                else: s += f"{row}\n"
+                if 3 <= num and num <= 7:
+                    s += f"{row[::-1]} {matrix4[7-num]}\n"
+                else: s += f"{row[::-1]}\n"
             s += "   a   b   c   d   e  \n"
 
             for i in range(5): # Prints Red's cards
@@ -240,13 +240,13 @@ class Board:
                 s += f" {matrix1[i]}   {matrix0[i]} \n" if i == 0 else f" {matrix1[i][::-1]}   {matrix0[i][::-1]} \n"
 
             # Prints play area
-            for num, row in enumerate(reversed(self.create_matrix())): # Prints row numbers
-                s += " " if num%2 == 0 else str(4-(num//2)) 
-                
+            for num, row in enumerate(self.create_matrix()): # Prints row numbers
+                s += " " if num%2 == 0 else str(num//2)
+
                 # Prints rows from self matrix, followed by 4th card for central rows
-                if 3 <= num and num <= 7:
-                    s += f"{row[::-1]} {matrix4[7-num]}\n"
-                else: s += f"{row[::-1]}\n"
+                if 3 <= num and num <= 7: 
+                    s += f"{row} {matrix4[7-num]}\n"
+                else: s += f"{row}\n"
             s += "   e   d   c   b   a  \n"
 
             for i in range(5): # Prints Blue's cards
@@ -258,11 +258,11 @@ class Board:
         if self.turn_colour() == "RED":
             current_cards = self.cards[0:2] 
             current_pieces = self.positions[0:5]
-            mul = -1
+            mul = 1
         else:
             current_cards = self.cards[2:4] 
             current_pieces = self.positions[5:10]
-            mul = 1
+            mul = -1
 
         possible_moves = []
         for position in current_pieces:
@@ -362,7 +362,7 @@ def request_move(board):
         raw_move_coords = []
         for num, char in enumerate(move_input):
             if num%2 == 0: # Parse letters
-                raw_move_coords.append(ord(char)-97)
+                raw_move_coords.append(101-ord(char))
             else:          # Parse digits
                 raw_move_coords.append(int(char))
 
@@ -446,7 +446,7 @@ GAME BEGINS
             move = request_move(board)
         else:
             move = request_bot_move(board)
-            print('Bot plays: ',chr(move[0][0]+97),move[0][1],chr(move[1][0]+97),move[1][1], sep = '')
+            print('Bot plays: ',chr(101-move[0][0]),move[0][1],chr(101-move[1][0]),move[1][1], sep = '')
 
         # Update boardstate by executing move
         board.execute_move(move)

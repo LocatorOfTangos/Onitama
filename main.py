@@ -287,7 +287,7 @@ class Board:
 
         score = 0
 
-        # Prioritise the center and add piece values
+        # Prioritise the center and add piece values for students
         for piece in self.positions[1:5]:
             if piece != (-1,-1): score += (CENTER_PRIORITY[piece[0]][piece[1]] + STUDENT_VALUE)
         for piece in self.positions[6:10]:
@@ -402,6 +402,32 @@ def request_shortsighted_bot_move(board):
     
     return random.sample([possible_move[:-1] for possible_move in possible_moves if possible_move[-1] == max([possible_move[-1] for possible_move in possible_moves])],1)[0]
 
+def request_simple_search_bot_move(board):
+
+    DEPTH = 3
+
+    return recursive_search(board, DEPTH)
+
+def recursive_search(board, depth):
+
+    possible_moves = board.possible_moves()
+
+    if possible_moves == None:
+        print("AAAAAAAAAAAAAA")
+
+    for pos, move in enumerate(possible_moves):
+        simulation_board = copy.deepcopy(board)
+        simulation_board.execute_move(move)
+        if depth < 1 or simulation_board.is_won():
+            possible_moves[pos].append(simulation_board.evaluate_position())
+        else:
+            possible_moves[pos].append(recursive_search(simulation_board, depth-1)[-1])
+    
+    if board.turn_colour() == "RED":
+        return random.sample([possible_move for possible_move in possible_moves if possible_move[-1] == max([possible_move[-1] for possible_move in possible_moves])],1)[0]
+    elif board.turn_colour() == "BLUE":
+        return random.sample([possible_move for possible_move in possible_moves if possible_move[-1] == min([possible_move[-1] for possible_move in possible_moves])],1)[0]
+        
 
 # Main game loop for two player mode
 def two_player_mode():
@@ -515,9 +541,55 @@ GAME BEGINS
         # Update boardstate by executing move
         board.execute_move(move)
 
+def simple_search_bot_mode():
+    player_colour = "BLUE"
+
+    print(
+f'''simple search bot mode.
+
+Usage: input move by typing start and end coordinates: \'a1b2\'
+You may be asked to specify a card. In this case, name the desired card: \'pigeon\'
+
+You are BLUE.
+
+GAME BEGINS
+'''      )
+
+    board = Board() # Set initial boardstate
+
+    evaluation = None
+
+    while True: # Main game loop
+
+        print(board) # Print boardstate at beginning of any turn
+
+        if evaluation: print(evaluation)
+
+        # Check if the board is won, end game if so
+        victory_type = board.is_won()
+        if victory_type:
+            print_victory(victory_type) # Print victory information
+            return
+
+        # Print who's turn it is
+        print(f"{board.turn_colour()}\'s turn.")
+
+        # Request a move
+        if board.turn_colour() == player_colour:
+            move = request_move(board)
+        else:
+            move = request_simple_search_bot_move(board)
+            evaluation = move[-1]
+            move = move[:-1]
+            print('Bot plays: ',chr(101-move[0][0]),move[0][1],chr(101-move[1][0]),move[1][1], sep = '')
+
+        # Update boardstate by executing move
+        board.execute_move(move)
+
 if __name__ == "__main__":
     print("\nWelcome to ONITAMA\n")
-    response = input("Enter 1 to play locally, 2 to play a random bot, 3 to play a shortsighted bot: ")
+    response = input("Enter 1 to play locally, 2 to play a random bot, 3 to play a shortsighted bot, 4 to play a simple search bot: ")
     if response == '1': two_player_mode() 
     elif response == '2': random_bot_mode()
     elif response == '3': shortsighted_bot_mode()
+    elif response == '4': simple_search_bot_mode()

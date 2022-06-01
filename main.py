@@ -432,34 +432,37 @@ def request_simple_search_bot_move(board):
         try: 
             if simulation_board.is_won()[0] == 'RED': return move, 1000
         except: pass
-        evaluations.append(recursive_search(simulation_board, DEPTH-1))
+        evaluations.append(recursive_search(simulation_board, DEPTH-1, -1000, 1000))
     
     return random.sample([(possible_moves[idx], evaluation) for idx, evaluation in enumerate(evaluations) if evaluation == max(evaluations)],1)[0]
 
-def recursive_search(board, depth):
+def recursive_search(board, depth, alpha, beta):
     global EXPANSION_COUNT
 
     possible_moves = board.possible_moves()
-    EXPANSION_COUNT += len(possible_moves)
 
     if board.turn_colour_num() == 0:
         eval_to_beat = -1000
         for move in possible_moves:
             simulation_board = board.copy()
             simulation_board.execute_move(move)
-            if depth <= 1 or simulation_board.is_won():
-                if simulation_board.evaluate_position() > eval_to_beat: eval_to_beat = simulation_board.evaluate_position()
-            else:
-                if recursive_search(simulation_board, depth-1) > eval_to_beat: eval_to_beat = recursive_search(simulation_board, depth-1)
+            EXPANSION_COUNT += 1
+            result = simulation_board.evaluate_position() if (depth <= 1 or simulation_board.is_won()) else recursive_search(simulation_board, depth-1, alpha, beta)
+            eval_to_beat = max(eval_to_beat, result)
+            if eval_to_beat >= beta: break
+            alpha = max(alpha, eval_to_beat)
+            
+
     else:
         eval_to_beat = 1000
         for move in possible_moves:
             simulation_board = board.copy()
             simulation_board.execute_move(move)
-            if depth <= 1 or simulation_board.is_won():
-                if simulation_board.evaluate_position() < eval_to_beat: eval_to_beat = simulation_board.evaluate_position()
-            else:
-                if recursive_search(simulation_board, depth-1) < eval_to_beat: eval_to_beat = recursive_search(simulation_board, depth-1)
+            EXPANSION_COUNT += 1
+            result = simulation_board.evaluate_position() if (depth <= 1 or simulation_board.is_won()) else recursive_search(simulation_board, depth-1, alpha, beta)
+            eval_to_beat = min(eval_to_beat, result)
+            if eval_to_beat <= alpha: break
+            beta = min(beta, eval_to_beat)
             
     return eval_to_beat
         

@@ -418,7 +418,7 @@ def request_shortsighted_bot_move(board):
     return random.sample([possible_move[0] for possible_move in possible_moves if possible_move[1] == max([possible_move[1] for possible_move in possible_moves])],1)[0]
 
 #########
-DEPTH = 6
+DEPTH = 7
 #########
 
 def request_simple_search_bot_move(board):
@@ -426,15 +426,27 @@ def request_simple_search_bot_move(board):
     possible_moves = board.possible_moves()
     evaluations = []
 
-    for pos, move in enumerate(possible_moves):
-        simulation_board = board.copy()
-        simulation_board.execute_move(move)
-        try: 
-            if simulation_board.is_won()[0] == 'RED': return move, 1000
-        except: pass
-        evaluations.append(recursive_search(simulation_board, DEPTH-1, -1000, 1000))
+    if board.turn_colour_num() == 0:
+        for move in possible_moves:
+            simulation_board = board.copy()
+            simulation_board.execute_move(move)
+            try: 
+                if simulation_board.is_won()[0] == 'RED': return move, 1000
+            except: pass
+            evaluations.append(recursive_search(simulation_board, DEPTH-1, -1000, 1000))
+        
+        return random.sample([(possible_moves[idx], evaluation) for idx, evaluation in enumerate(evaluations) if evaluation == max(evaluations)],1)[0]
     
-    return random.sample([(possible_moves[idx], evaluation) for idx, evaluation in enumerate(evaluations) if evaluation == max(evaluations)],1)[0]
+    else:
+        for move in possible_moves:
+            simulation_board = board.copy()
+            simulation_board.execute_move(move)
+            try: 
+                if simulation_board.is_won()[0] == 'BLUE': return move, -1000
+            except: pass
+            evaluations.append(recursive_search(simulation_board, DEPTH-1, -1000, 1000))
+        
+        return random.sample([(possible_moves[idx], evaluation) for idx, evaluation in enumerate(evaluations) if evaluation == min(evaluations)],1)[0]
 
 def recursive_search(board, depth, alpha, beta):
     global EXPANSION_COUNT
@@ -582,8 +594,8 @@ GAME BEGINS
 EXPANSION_COUNT = 0
 
 def simple_search_bot_mode():
-    player_colour = "BLUE"
     global EXPANSION_COUNT
+    player_colour = "RED" if random.randint(0,1) == 0 else "BLUE"
 
     print(
 f'''simple search bot mode.
@@ -591,7 +603,7 @@ f'''simple search bot mode.
 Usage: input move by typing start and end coordinates: \'a1b2\'
 You may be asked to specify a card. In this case, name the desired card: \'pigeon\'
 
-You are BLUE.
+You are {player_colour}.
 
 GAME BEGINS
 '''      )
@@ -630,10 +642,51 @@ GAME BEGINS
         # Update boardstate by executing move
         board.execute_move(move)
 
+def exhibition_match_mode():
+    global EXPANSION_COUNT
+
+    print(
+f'''Exhibition match mode.
+
+Usage: Sit back and relax
+
+GAME BEGINS
+'''      )
+
+    board = Board() # Set initial boardstate
+
+    evaluation = None
+
+    while True: # Main game loop
+
+        print(board) # Print boardstate at beginning of any turn
+
+        # Check if the board is won, end game if so
+        victory_type = board.is_won()
+        if victory_type:
+            print_victory(victory_type) # Print victory information
+            return
+
+        # Print who's turn it is
+        print(f"{board.turn_colour()}\'s turn.\n")
+
+        # Request a move
+        start_time = time.time()
+        EXPANSION_COUNT = 0
+        move = request_simple_search_bot_move(board)
+        print(f'Number of states expanded = {EXPANSION_COUNT}')
+        evaluation = move[1]
+        move = move[0]
+        print(f'{board.turn_colour()} bot plays {chr(101-move[0][0])}{move[0][1]}{chr(101-move[1][0])}{move[1][1]} after searching for {time.time() - start_time} seconds to a depth of {DEPTH}.\nEvaluation stands at {evaluation}.\n')
+
+        # Update boardstate by executing move
+        board.execute_move(move)
+
 if __name__ == "__main__":
     print("\nWelcome to ONITAMA\n")
-    response = input("Enter 1 to play locally, 2 to play a random bot, 3 to play a shortsighted bot, 4 to play a simple search bot: ")
+    response = input("Enter 1 to play locally, 2 to play a random bot, 3 to play a shortsighted bot, 4 to play a simple search bot, 5 to watch an exhibition match: ")
     if response == '1': two_player_mode() 
     elif response == '2': random_bot_mode()
     elif response == '3': shortsighted_bot_mode()
     elif response == '4': simple_search_bot_mode()
+    elif response == '5': exhibition_match_mode()

@@ -1,6 +1,7 @@
 import random
 import re
 import copy
+import time
 
 # Initial postitions for a typical game
 INITIAL_POSITIONS = [(2,0),(0,0),(1,0),(3,0),(4,0),(2,4),(0,4),(1,4),(3,4),(4,4)]
@@ -13,9 +14,9 @@ class Card:
         create_matrix()     - Creates list-of-lists card representation that prints elegantly
     '''
 
-    def __init__(self, name, stamp, card_moves):
+    def __init__(self, name, idx, card_moves):
         self.name = name
-        self.stamp = stamp
+        self.idx = idx
         self.card_moves = card_moves
         self.matrix = self.create_matrix()
 
@@ -44,24 +45,24 @@ class Card:
         return full_matrix
 
 # The Deck contains all cards in Onitama
-DECK = [
-    Card('tiger', 'blue', [(0,2), (0,-1)]),
-    Card('monkey', 'blue', [(1,1),(-1,1),(-1,-1),(1,-1)]),
-    Card('dragon', 'red', [(2,1),(-2,1),(-1,-1),(1,-1)]),
-    Card('crab', 'blue', [(2,0),(-2,0),(0,1)]),
-    Card('mantis', 'red', [(1,1),(-1,1),(0,-1)]),
-    Card('frog', 'red', [(-2,0),(-1,1),(1,-1)]),
-    Card('elephant', 'red', [(-1,0),(-1,1),(1,1),(1,0)]),
-    Card('rooster', 'red', [(-1,0),(-1,-1),(1,1),(1,0)]),
-    Card('boar', 'red', [(-1,0),(0,1),(1,0)]),
-    Card('ox', 'blue', [(1,0),(0,-1),(0,1)]),
-    Card('crane', 'blue', [(1,-1),(-1,-1),(0,1)]),
-    Card('eel', 'blue', [(-1,1),(-1,-1),(1,0)]),
-    Card('horse', 'red', [(-1,0),(0,-1),(0,1)]),
-    Card('cobra', 'red', [(1,1),(1,-1),(-1,0)]),
-    Card('goose', 'blue', [(-1,0),(-1,1),(1,-1),(1,0)]),
-    Card('rabbit', 'blue', [(2,0),(1,1),(-1,-1)])
-]
+DECK = (
+    Card('tiger', 0, ((0,2), (0,-1))),
+    Card('monkey', 1, ((1,1),(-1,1),(-1,-1),(1,-1))),
+    Card('dragon', 2, ((2,1),(-2,1),(-1,-1),(1,-1))),
+    Card('crab', 3, ((2,0),(-2,0),(0,1))),
+    Card('mantis', 4, ((1,1),(-1,1),(0,-1))),
+    Card('frog', 5, ((-2,0),(-1,1),(1,-1))),
+    Card('elephant', 6, ((-1,0),(-1,1),(1,1),(1,0))),
+    Card('rooster', 7, ((-1,0),(-1,-1),(1,1),(1,0))),
+    Card('boar', 8, ((-1,0),(0,1),(1,0))),
+    Card('ox', 9, ((1,0),(0,-1),(0,1))),
+    Card('crane', 10, ((1,-1),(-1,-1),(0,1))),
+    Card('eel', 11, ((-1,1),(-1,-1),(1,0))),
+    Card('horse', 12, ((-1,0),(0,-1),(0,1))),
+    Card('cobra', 13, ((1,1),(1,-1),(-1,0))),
+    Card('goose', 14, ((-1,0),(-1,1),(1,-1),(1,0))),
+    Card('rabbit', 15, ((2,0),(1,1),(-1,-1)))
+)
 
 # The Board class represents a gamestate
 class Board:
@@ -70,6 +71,8 @@ class Board:
 
     Methods:
         turn_colour()                   - Returns 'RED' or 'BLUE' depending on player turn
+        turn_colour_num()               - Returns 0 or 1 depending on player turn (when speed necessary)
+        copy()                          - Returns a duplicate of the board that does not duplicate where unnecessary
         create_matrix()                 - Creates list-of-lists representation of the board that prints elegantly
         validate_move(move_coords)      - Returns None and prints cause of invalidity for invalid moves coordinates. Requests user input if card used is ambiguous, and returns move if valid
         execute_move(move)              - Updates the board object by executing a given move
@@ -80,15 +83,21 @@ class Board:
         evaluate_position()             - Returns minimax-style position evaluation
     '''
 
-    def __init__(self, turn=None, positions=INITIAL_POSITIONS, cards=random.sample(DECK,5)):
+    def __init__(self, turn=None, positions=INITIAL_POSITIONS, cards=random.sample(range(len(DECK)),5)):
         self.positions = positions
         self.cards = cards
         if turn is None:
-            self.turn = 0 if cards[4].stamp == "red" else 1  # Set game to start on turn 0 or 1 depending on whether RED or BLUE start respectively
+            self.turn = random.randint(0,1)  # Set game to start on turn 0 or 1 randomly
         else: self.turn = turn
 
     def turn_colour(self):
         return "RED" if self.turn % 2 == 0 else "BLUE"
+
+    def turn_colour_num(self):
+        return self.turn % 2
+
+    def copy(self):
+        return Board(self.turn, list(self.positions), list(self.cards))
 
     def create_matrix(self):
 
@@ -98,7 +107,7 @@ class Board:
         # Loop through pieces on the board, replace corresponsing matrix entry with appropriate character
         for num, piece in enumerate(self.positions):
 
-            if piece == (-1,-1): continue # Ignore piece if captured
+            if piece is None: continue # Ignore piece if captured
 
             if num == 0: matrix[piece[1]][piece[0]] = "R"
             elif num <= 4: matrix[piece[1]][piece[0]] = "r"
@@ -123,11 +132,11 @@ class Board:
 
         if self.turn % 2 == 0: 
             pieces = self.positions[0:5] # Red's Master and Students
-            cards = self.cards[0:2] # Red's cards
+            cards = [DECK[idx] for idx in self.cards[0:2]] # Red's cards
             mul = 1 # Multiplier reverses both axes for given moves
         else: 
             pieces = self.positions[5:10] # Blue's Master and Students
-            cards = self.cards[2:4] # Blue's  cards
+            cards = [DECK[idx] for idx in self.cards[2:4]] # Blue's  cards
             mul = -1 # Multiplier does not reverse axes
 
         # Check input moves a friendly piece
@@ -161,13 +170,13 @@ class Board:
             # Record card used
             if response == cards[0].name: card_used = 0
             else: card_used = 1
-            move = move_coords + [cards[card_used]]
+            move = (move_coords[0], move_coords[1], cards[card_used].idx)
             return move
 
         # Record card used
         if card_move in cards[0].card_moves: card_used = 0
         else: card_used = 1
-        move = move_coords + [cards[card_used]]
+        move = (move_coords[0], move_coords[1], cards[card_used].idx)
         return move
 
     # Updates the board state by executing a move
@@ -176,11 +185,11 @@ class Board:
         self.turn += 1 # Increments turn count
 
         # Swaps used card with waiting card
-        self.cards[[card.name for card in self.cards].index(move[2].name)] = self.cards[4]
+        self.cards[self.cards.index(move[2])] = self.cards[4]
         self.cards[4] = move[2]
 
         # Captures enemy piece, if it exists
-        try: self.positions[self.positions.index(move[1])] = (-1,-1)
+        try: self.positions[self.positions.index(move[1])] = None
         except ValueError: pass
 
         # Updates piece's position
@@ -190,14 +199,14 @@ class Board:
     def is_won(self):
         if self.positions[0] == (2,4): return ("RED", "STREAM")
         elif self.positions[5] == (2,0): return ("BLUE", "STREAM")
-        elif self.positions[0] == (-1,-1): return ("BLUE", "STONE")
-        elif self.positions[5] == (-1,-1): return ("RED", "STONE")
+        elif self.positions[0] is None: return ("BLUE", "STONE")
+        elif self.positions[5] is None: return ("RED", "STONE")
         else: return None
 
     # Returns subjective game stage evaluation
     def game_stage(self):
-        num_red_students = len([1 for student in self.positions[1:5] if student != (-1,-1)])
-        num_blue_students = len([1 for student in self.positions[6:10] if student != (-1,-1)])
+        num_red_students = len([1 for student in self.positions[1:5] if student])
+        num_blue_students = len([1 for student in self.positions[6:10] if student])
         min_students = min(num_red_students,num_blue_students)
         if min_students >= 4: return "OPENING"
         elif min_students >= 2: return "MIDGAME"
@@ -207,11 +216,11 @@ class Board:
     def __str__(self):
 
         # Prepare the move matrix for each card in play, to be displayed
-        matrix0 = self.cards[0].matrix
-        matrix1 = self.cards[1].matrix
-        matrix2 = self.cards[2].matrix
-        matrix3 = self.cards[3].matrix
-        matrix4 = self.cards[4].matrix
+        matrix0 = DECK[self.cards[0]].matrix
+        matrix1 = DECK[self.cards[1]].matrix
+        matrix2 = DECK[self.cards[2]].matrix
+        matrix3 = DECK[self.cards[3]].matrix
+        matrix4 = DECK[self.cards[4]].matrix
 
         # Prepare string
         s = ''
@@ -255,7 +264,7 @@ class Board:
 
     # Returns a list of legal moves given a position.
     def possible_moves(self):
-        if self.turn_colour() == "RED":
+        if self.turn_colour_num() == 0:
             current_cards = self.cards[0:2] 
             current_pieces = self.positions[0:5]
             mul = 1
@@ -266,16 +275,22 @@ class Board:
 
         possible_moves = []
         for position in current_pieces:
-            if position == (-1,-1): continue
+            if position is None: continue
 
             for card in current_cards:
 
-                for card_move in card.card_moves:
+                for card_move in DECK[card].card_moves:
 
                     destination = (position[0] - mul*card_move[0], mul*card_move[1] + position[1])
 
-                    if destination[0] not in range(5) or destination[1] not in range(5) or destination in current_pieces: continue
-                    possible_moves.append([position,destination,card])
+                    if destination[0] < 0 or destination[0] > 4: continue
+                    if destination[1] < 0 or destination[1] > 4: continue
+                    if destination in current_pieces: continue
+                    possible_moves.append((position,destination,card))
+
+        if possible_moves is None:
+            print("AAAAAAAAAAAAAA")
+            exit()
 
         return possible_moves
 
@@ -289,9 +304,9 @@ class Board:
 
         # Prioritise the center and add piece values for students
         for piece in self.positions[1:5]:
-            if piece != (-1,-1): score += (CENTER_PRIORITY[piece[0]][piece[1]] + STUDENT_VALUE)
+            if piece: score += (CENTER_PRIORITY[piece[0]][piece[1]] + STUDENT_VALUE)
         for piece in self.positions[6:10]:
-            if piece != (-1,-1): score -= (CENTER_PRIORITY[piece[0]][piece[1]] + STUDENT_VALUE)
+            if piece: score -= (CENTER_PRIORITY[piece[0]][piece[1]] + STUDENT_VALUE)
 
         # Evaluate master positioning
         game_stage = self.game_stage()
@@ -398,35 +413,55 @@ def request_shortsighted_bot_move(board):
             simsimulation_board.execute_move(move)
             evaluation = simsimulation_board.evaluate_position()
             if evaluation < worst_outcome: worst_outcome = evaluation
-        possible_moves[pos].append(worst_outcome)
+        possible_moves[pos]=(possible_moves[pos],worst_outcome)
     
-    return random.sample([possible_move[:-1] for possible_move in possible_moves if possible_move[-1] == max([possible_move[-1] for possible_move in possible_moves])],1)[0]
+    return random.sample([possible_move[0] for possible_move in possible_moves if possible_move[1] == max([possible_move[1] for possible_move in possible_moves])],1)[0]
+
+#########
+DEPTH = 6
+#########
 
 def request_simple_search_bot_move(board):
 
-    DEPTH = 3
-
-    return recursive_search(board, DEPTH)
-
-def recursive_search(board, depth):
-
     possible_moves = board.possible_moves()
-
-    if possible_moves == None:
-        print("AAAAAAAAAAAAAA")
+    evaluations = []
 
     for pos, move in enumerate(possible_moves):
-        simulation_board = copy.deepcopy(board)
+        simulation_board = board.copy()
         simulation_board.execute_move(move)
-        if depth < 1 or simulation_board.is_won():
-            possible_moves[pos].append(simulation_board.evaluate_position())
-        else:
-            possible_moves[pos].append(recursive_search(simulation_board, depth-1)[-1])
+        try: 
+            if simulation_board.is_won()[0] == 'RED': return move, 1000
+        except: pass
+        evaluations.append(recursive_search(simulation_board, DEPTH-1))
     
-    if board.turn_colour() == "RED":
-        return random.sample([possible_move for possible_move in possible_moves if possible_move[-1] == max([possible_move[-1] for possible_move in possible_moves])],1)[0]
-    elif board.turn_colour() == "BLUE":
-        return random.sample([possible_move for possible_move in possible_moves if possible_move[-1] == min([possible_move[-1] for possible_move in possible_moves])],1)[0]
+    return random.sample([(possible_moves[idx], evaluation) for idx, evaluation in enumerate(evaluations) if evaluation == max(evaluations)],1)[0]
+
+def recursive_search(board, depth):
+    global EXPANSION_COUNT
+
+    possible_moves = board.possible_moves()
+    EXPANSION_COUNT += len(possible_moves)
+
+    if board.turn_colour_num() == 0:
+        eval_to_beat = -1000
+        for move in possible_moves:
+            simulation_board = board.copy()
+            simulation_board.execute_move(move)
+            if depth <= 1 or simulation_board.is_won():
+                if simulation_board.evaluate_position() > eval_to_beat: eval_to_beat = simulation_board.evaluate_position()
+            else:
+                if recursive_search(simulation_board, depth-1) > eval_to_beat: eval_to_beat = recursive_search(simulation_board, depth-1)
+    else:
+        eval_to_beat = 1000
+        for move in possible_moves:
+            simulation_board = board.copy()
+            simulation_board.execute_move(move)
+            if depth <= 1 or simulation_board.is_won():
+                if simulation_board.evaluate_position() < eval_to_beat: eval_to_beat = simulation_board.evaluate_position()
+            else:
+                if recursive_search(simulation_board, depth-1) < eval_to_beat: eval_to_beat = recursive_search(simulation_board, depth-1)
+            
+    return eval_to_beat
         
 
 # Main game loop for two player mode
@@ -541,8 +576,11 @@ GAME BEGINS
         # Update boardstate by executing move
         board.execute_move(move)
 
+EXPANSION_COUNT = 0
+
 def simple_search_bot_mode():
     player_colour = "BLUE"
+    global EXPANSION_COUNT
 
     print(
 f'''simple search bot mode.
@@ -563,8 +601,6 @@ GAME BEGINS
 
         print(board) # Print boardstate at beginning of any turn
 
-        if evaluation: print(evaluation)
-
         # Check if the board is won, end game if so
         victory_type = board.is_won()
         if victory_type:
@@ -572,16 +608,21 @@ GAME BEGINS
             return
 
         # Print who's turn it is
-        print(f"{board.turn_colour()}\'s turn.")
+        print(f"{board.turn_colour()}\'s turn.\n")
 
         # Request a move
         if board.turn_colour() == player_colour:
             move = request_move(board)
         else:
+            start_time = time.time()
+
+            
+            EXPANSION_COUNT = 0
             move = request_simple_search_bot_move(board)
-            evaluation = move[-1]
-            move = move[:-1]
-            print('Bot plays: ',chr(101-move[0][0]),move[0][1],chr(101-move[1][0]),move[1][1], sep = '')
+            print(f'Number of states expanded = {EXPANSION_COUNT}')
+            evaluation = move[1]
+            move = move[0]
+            print(f'Bot plays {chr(101-move[0][0])}{move[0][1]}{chr(101-move[1][0])}{move[1][1]} after searching for {time.time() - start_time} seconds to a depth of {DEPTH}.\nEvaluation stands at {evaluation}.\n')
 
         # Update boardstate by executing move
         board.execute_move(move)

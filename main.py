@@ -49,19 +49,19 @@ DECK = (
     Card('tiger', 0, ((0,2), (0,-1))),
     Card('monkey', 1, ((1,1),(-1,1),(-1,-1),(1,-1))),
     Card('dragon', 2, ((2,1),(-2,1),(-1,-1),(1,-1))),
-    Card('crab', 3, ((2,0),(-2,0),(0,1))),
+    Card('crab', 3, ((0,1),(2,0),(-2,0))),
     Card('mantis', 4, ((1,1),(-1,1),(0,-1))),
-    Card('frog', 5, ((-2,0),(-1,1),(1,-1))),
-    Card('elephant', 6, ((-1,0),(-1,1),(1,1),(1,0))),
-    Card('rooster', 7, ((-1,0),(-1,-1),(1,1),(1,0))),
-    Card('boar', 8, ((-1,0),(0,1),(1,0))),
-    Card('ox', 9, ((1,0),(0,-1),(0,1))),
-    Card('crane', 10, ((1,-1),(-1,-1),(0,1))),
-    Card('eel', 11, ((-1,1),(-1,-1),(1,0))),
-    Card('horse', 12, ((-1,0),(0,-1),(0,1))),
-    Card('cobra', 13, ((1,1),(1,-1),(-1,0))),
-    Card('goose', 14, ((-1,0),(-1,1),(1,-1),(1,0))),
-    Card('rabbit', 15, ((2,0),(1,1),(-1,-1)))
+    Card('frog', 5, ((-1,1),(-2,0),(1,-1))),
+    Card('elephant', 6, ((-1,1),(1,1),(-1,0),(1,0))),
+    Card('rooster', 7, ((1,1),(-1,0),(1,0),(-1,-1))),
+    Card('boar', 8, ((0,1),(-1,0),(1,0))),
+    Card('ox', 9, ((0,1),(1,0),(0,-1))),
+    Card('crane', 10, ((0,1),(1,-1),(-1,-1))),
+    Card('eel', 11, ((-1,1),(1,0),(-1,-1))),
+    Card('horse', 12, ((0,1),(-1,0),(0,-1))),
+    Card('cobra', 13, ((1,1),(-1,0),(1,-1))),
+    Card('goose', 14, ((-1,1),(-1,0),(1,0),(1,-1))),
+    Card('rabbit', 15, ((1,1),(2,0),(-1,-1)))
 )
 
 # The Board class represents a gamestate
@@ -213,7 +213,7 @@ class Board:
         else: return "ENDGAME"
 
     # returns a string representation of the board that is pretty
-    def __str__(self):
+    def board_str(self, side=None):
 
         # Prepare the move matrix for each card in play, to be displayed
         matrix0 = DECK[self.cards[0]].matrix
@@ -225,7 +225,9 @@ class Board:
         # Prepare string
         s = ''
 
-        if self.turn % 2 == 0: # Red's turn
+        if side is None: side = self.turn_colour()
+
+        if side == 'RED': # Red's perspective
 
             for i in range(5): # Prints Blue's cards
                 s += f" {matrix3[i]}   {matrix2[i]} \n" if i == 0 else f" {matrix3[i][::-1]}   {matrix2[i][::-1]} \n"
@@ -243,7 +245,7 @@ class Board:
             for i in range(5): # Prints Red's cards
                 s += f" {matrix0[4-i]}   {matrix1[4-i]} \n"
 
-        else:   # Blue's turn
+        else:   # Blue's perspective
 
             for i in range(5): # Prints Red's cards
                 s += f" {matrix1[i]}   {matrix0[i]} \n" if i == 0 else f" {matrix1[i][::-1]}   {matrix0[i][::-1]} \n"
@@ -288,7 +290,55 @@ class Board:
                     if destination in current_pieces: continue
                     possible_moves.append((position,destination,card))
 
-        if possible_moves is None:
+        if possible_moves == []:
+            print("AAAAAAAAAAAAAA")
+            exit()
+
+        return possible_moves
+
+    # Returns a list of legal moves given a position, orders moves in a manner beneficial for alpha beta pruning
+    def possible_moves_search_optimised(self):
+        captures = []
+        other_moves = []
+        if self.turn_colour_num() == 0:
+            for position in self.positions[0:5]:
+                if position is None: continue
+
+                for card in self.cards[0:2]:
+
+                    for card_move in DECK[card].card_moves:
+
+                        destination = (position[0] - card_move[0], card_move[1] + position[1])
+
+                        if destination[0] < 0 or destination[0] > 4: continue
+                        if destination[1] < 0 or destination[1] > 4: continue
+                        if destination in self.positions[0:5]: continue
+
+                        if destination == self.positions[5]: return [(position,destination,card)]
+                        elif destination in self.positions[6:10]: captures.append((position,destination,card))
+                        else: other_moves.append((position,destination,card))
+
+        else:
+            for position in self.positions[5:10]:
+                if position is None: continue
+
+                for card in self.cards[2:4]:
+
+                    for card_move in DECK[card].card_moves:
+
+                        destination = (position[0] + card_move[0], -card_move[1] + position[1])
+
+                        if destination[0] < 0 or destination[0] > 4: continue
+                        if destination[1] < 0 or destination[1] > 4: continue
+                        if destination in self.positions[5:10]: continue
+
+                        if destination == self.positions[0]: return [(position,destination,card)]
+                        elif destination in self.positions[1:5]: captures.append((position,destination,card))
+                        else: other_moves.append((position,destination,card))
+
+        possible_moves = captures + other_moves
+        
+        if possible_moves == []:
             print("AAAAAAAAAAAAAA")
             exit()
 
@@ -418,12 +468,12 @@ def request_shortsighted_bot_move(board):
     return random.sample([possible_move[0] for possible_move in possible_moves if possible_move[1] == max([possible_move[1] for possible_move in possible_moves])],1)[0]
 
 #########
-DEPTH = 7
+DEPTH = 8
 #########
 
 def request_simple_search_bot_move(board):
 
-    possible_moves = board.possible_moves()
+    possible_moves = board.possible_moves_search_optimised()
     evaluations = []
 
     if board.turn_colour_num() == 0:
@@ -451,7 +501,7 @@ def request_simple_search_bot_move(board):
 def recursive_search(board, depth, alpha, beta):
     global EXPANSION_COUNT
 
-    possible_moves = board.possible_moves()
+    possible_moves = board.possible_moves_search_optimised()
 
     if board.turn_colour_num() == 0:
         eval_to_beat = -1000
@@ -463,7 +513,6 @@ def recursive_search(board, depth, alpha, beta):
             eval_to_beat = max(eval_to_beat, result)
             if eval_to_beat >= beta: break
             alpha = max(alpha, eval_to_beat)
-            
 
     else:
         eval_to_beat = 1000
@@ -495,7 +544,7 @@ GAME BEGINS
 
     while True: # Main game loop
 
-        print(board) # Print boardstate at beginning of any turn
+        print(board.board_str()) # Print boardstate at beginning of any turn
 
         # Check if the board is won, end game if so
         victory_type = board.is_won()
@@ -531,7 +580,7 @@ GAME BEGINS
 
     while True: # Main game loop
 
-        print(board) # Print boardstate at beginning of any turn
+        print(board.board_str()) # Print boardstate at beginning of any turn
 
         # Check if the board is won, end game if so
         victory_type = board.is_won()
@@ -570,7 +619,7 @@ GAME BEGINS
 
     while True: # Main game loop
 
-        print(board) # Print boardstate at beginning of any turn
+        print(board.board_str()) 
 
         # Check if the board is won, end game if so
         victory_type = board.is_won()
@@ -614,7 +663,7 @@ GAME BEGINS
 
     while True: # Main game loop
 
-        print(board) # Print boardstate at beginning of any turn
+        print(board.board_str()) # Print boardstate at beginning of any turn
 
         # Check if the board is won, end game if so
         victory_type = board.is_won()
@@ -659,7 +708,7 @@ GAME BEGINS
 
     while True: # Main game loop
 
-        print(board) # Print boardstate at beginning of any turn
+        print(board.board_str('RED')) # Print boardstate from RED's perspective at beginning of any turn
 
         # Check if the board is won, end game if so
         victory_type = board.is_won()
@@ -677,7 +726,9 @@ GAME BEGINS
         print(f'Number of states expanded = {EXPANSION_COUNT}')
         evaluation = move[1]
         move = move[0]
-        print(f'{board.turn_colour()} bot plays {chr(101-move[0][0])}{move[0][1]}{chr(101-move[1][0])}{move[1][1]} after searching for {time.time() - start_time} seconds to a depth of {DEPTH}.\nEvaluation stands at {evaluation}.\n')
+        search_time = time.time() - start_time
+        if search_time < 2: time.sleep(2-search_time)
+        print(f'{board.turn_colour()} bot plays {chr(101-move[0][0])}{move[0][1]}{chr(101-move[1][0])}{move[1][1]} after searching for {search_time} seconds to a depth of {DEPTH}.\nEvaluation stands at {evaluation}.\n')
 
         # Update boardstate by executing move
         board.execute_move(move)

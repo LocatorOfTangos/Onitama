@@ -1,0 +1,67 @@
+[
+  {
+    "iteration": 0,
+    "temperature": 0.7,
+    "exploration": 20.0
+  },
+  {
+    "iteration": 1,
+    "temperature": 0.7259961021612696,
+    "exploration": 19.600000005656852
+  },
+  {
+    "iteration": 2,
+    "temperature": 0.7208144489105859,
+    "exploration": 19.47937908418668
+  },
+  {
+    "iteration": 3,
+    "temperature": 0.7260255564966795,
+    "exploration": 19.243094239549347
+  },
+  {
+    "iteration": 4,
+    "temperature": 0.7369455328939813,
+    "exploration": 18.959494709419655
+  },
+  {
+    "iteration": 5,
+    "temperature": 0.739313728539455,
+    "exploration": 18.85442477095618
+  },
+  {
+    "iteration": 6,
+    "temperature": 0.7377121288356348,
+    "exploration": 18.88133524399844
+  },
+  {
+    "iteration": 7,
+    "temperature": 0.7426625560471766,
+    "exploration": 18.855456430320928
+  },
+  {
+    "iteration": 8,
+    "temperature": 0.7444815084144225,
+    "exploration": 18.922649176561112
+  },
+  {
+    "iteration": 9,
+    "temperature": 0.7400184596402171,
+    "exploration": 18.982511159362552
+  },
+  {
+    "iteration": 10,
+    "temperature": 0.7386858348005135,
+    "exploration": 18.95583899121674
+  },
+  {
+    "iteration": 11,
+    "temperature": 0.7400136030143337,
+    "exploration": 19.003235354109716
+  },
+  {
+    "iteration": 12,
+    "temperature": 0.7412094839262864,
+    "exploration": 18.97095934587262
+  }
+]

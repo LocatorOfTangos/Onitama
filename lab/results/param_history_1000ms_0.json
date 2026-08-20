@@ -1,0 +1,372 @@
+[
+  {
+    "iteration": 0,
+    "temperature": 0.5,
+    "exploration": 15.0
+  },
+  {
+    "iteration": 1,
+    "temperature": 0.5185686444792316,
+    "exploration": 15.0
+  },
+  {
+    "iteration": 2,
+    "temperature": 0.5377396130952294,
+    "exploration": 15.223241040012358
+  },
+  {
+    "iteration": 3,
+    "temperature": 0.5496812399576945,
+    "exploration": 15.121943477121096
+  },
+  {
+    "iteration": 4,
+    "temperature": 0.5620649717852991,
+    "exploration": 15.178770884301628
+  },
+  {
+    "iteration": 5,
+    "temperature": 0.5727493612846607,
+    "exploration": 15.313785637354467
+  },
+  {
+    "iteration": 6,
+    "temperature": 0.5740302720853876,
+    "exploration": 15.431185954788486
+  },
+  {
+    "iteration": 7,
+    "temperature": 0.5701671752623699,
+    "exploration": 15.492080991870708
+  },
+  {
+    "iteration": 8,
+    "temperature": 0.566783190313191,
+    "exploration": 15.464038728727019
+  },
+  {
+    "iteration": 9,
+    "temperature": 0.5680048272704126,
+    "exploration": 15.400489381661455
+  },
+  {
+    "iteration": 10,
+    "temperature": 0.5722384623794662,
+    "exploration": 15.394160095141958
+  },
+  {
+    "iteration": 11,
+    "temperature": 0.578950713237974,
+    "exploration": 15.4335868055287
+  },
+  {
+    "iteration": 12,
+    "temperature": 0.5884765088838406,
+    "exploration": 15.488707978612725
+  },
+  {
+    "iteration": 13,
+    "temperature": 0.5984379570157184,
+    "exploration": 15.590664159303676
+  },
+  {
+    "iteration": 14,
+    "temperature": 0.6043782278284503,
+    "exploration": 15.639585763457037
+  },
+  {
+    "iteration": 15,
+    "temperature": 0.6056286882832399,
+    "exploration": 15.683997664956689
+  },
+  {
+    "iteration": 16,
+    "temperature": 0.609371146565136,
+    "exploration": 15.7627314688493
+  },
+  {
+    "iteration": 17,
+    "temperature": 0.6161970822036569,
+    "exploration": 15.834524871416999
+  },
+  {
+    "iteration": 18,
+    "temperature": 0.6256568540556258,
+    "exploration": 15.900020863172038
+  },
+  {
+    "iteration": 19,
+    "temperature": 0.6334858443007652,
+    "exploration": 16.009834636572265
+  },
+  {
+    "iteration": 20,
+    "temperature": 0.6369534883091947,
+    "exploration": 16.099180389207262
+  },
+  {
+    "iteration": 21,
+    "temperature": 0.6412265504184764,
+    "exploration": 16.22817602283669
+  },
+  {
+    "iteration": 22,
+    "temperature": 0.6484340255971074,
+    "exploration": 16.346532174617874
+  },
+  {
+    "iteration": 23,
+    "temperature": 0.6565861000820593,
+    "exploration": 16.498902504953747
+  },
+  {
+    "iteration": 24,
+    "temperature": 0.6668249676546474,
+    "exploration": 16.666957511178627
+  },
+  {
+    "iteration": 25,
+    "temperature": 0.6724762625378279,
+    "exploration": 16.8215970051248
+  },
+  {
+    "iteration": 26,
+    "temperature": 0.6800399960938377,
+    "exploration": 16.999593499612462
+  },
+  {
+    "iteration": 27,
+    "temperature": 0.6870052135291554,
+    "exploration": 17.21056804775167
+  },
+  {
+    "iteration": 28,
+    "temperature": 0.6934134561560745,
+    "exploration": 17.450742199505697
+  },
+  {
+    "iteration": 29,
+    "temperature": 0.7006539574140248,
+    "exploration": 17.616341371502276
+  },
+  {
+    "iteration": 30,
+    "temperature": 0.7045741119074724,
+    "exploration": 17.728347153560744
+  },
+  {
+    "iteration": 31,
+    "temperature": 0.7043987815581785,
+    "exploration": 17.831041515799683
+  },
+  {
+    "iteration": 32,
+    "temperature": 0.7016767137216137,
+    "exploration": 17.885199763087698
+  },
+  {
+    "iteration": 33,
+    "temperature": 0.695832792355151,
+    "exploration": 17.921268931345615
+  },
+  {
+    "iteration": 34,
+    "temperature": 0.692163088019736,
+    "exploration": 17.904829617872675
+  },
+  {
+    "iteration": 35,
+    "temperature": 0.6877233449125791,
+    "exploration": 17.839734574399685
+  },
+  {
+    "iteration": 36,
+    "temperature": 0.6812728559830076,
+    "exploration": 17.74413479213428
+  },
+  {
+    "iteration": 37,
+    "temperature": 0.6723331582140479,
+    "exploration": 17.6745998155455
+  },
+  {
+    "iteration": 38,
+    "temperature": 0.6667901898776251,
+    "exploration": 17.64973667183198
+  },
+  {
+    "iteration": 39,
+    "temperature": 0.6587423379995009,
+    "exploration": 17.61040811161028
+  },
+  {
+    "iteration": 40,
+    "temperature": 0.6492750782062054,
+    "exploration": 17.537835346353084
+  },
+  {
+    "iteration": 41,
+    "temperature": 0.641825938391309,
+    "exploration": 17.522903457628455
+  },
+  {
+    "iteration": 42,
+    "temperature": 0.6322392945466799,
+    "exploration": 17.5259038965323
+  },
+  {
+    "iteration": 43,
+    "temperature": 0.623642026062144,
+    "exploration": 17.47702961573966
+  },
+  {
+    "iteration": 44,
+    "temperature": 0.6188417067142971,
+    "exploration": 17.409803463756113
+  },
+  {
+    "iteration": 45,
+    "temperature": 0.6131342326613837,
+    "exploration": 17.395709230742114
+  },
+  {
+    "iteration": 46,
+    "temperature": 0.6102281011148039,
+    "exploration": 17.41904783581301
+  },
+  {
+    "iteration": 47,
+    "temperature": 0.6103851912711644,
+    "exploration": 17.463119838306827
+  },
+  {
+    "iteration": 48,
+    "temperature": 0.6135777709424151,
+    "exploration": 17.50328733686677
+  },
+  {
+    "iteration": 49,
+    "temperature": 0.6151010130814771,
+    "exploration": 17.493074978992148
+  },
+  {
+    "iteration": 50,
+    "temperature": 0.6174725905741335,
+    "exploration": 17.532407482316934
+  },
+  {
+    "iteration": 51,
+    "temperature": 0.6196356051484673,
+    "exploration": 17.61805462062472
+  },
+  {
+    "iteration": 52,
+    "temperature": 0.6227900560174133,
+    "exploration": 17.741698746886676
+  },
+  {
+    "iteration": 53,
+    "temperature": 0.6224382486045071,
+    "exploration": 17.854812931480915
+  },
+  {
+    "iteration": 54,
+    "temperature": 0.6221188609444795,
+    "exploration": 18.007235129537435
+  },
+  {
+    "iteration": 55,
+    "temperature": 0.6195769681816125,
+    "exploration": 18.109142543441106
+  },
+  {
+    "iteration": 56,
+    "temperature": 0.6172776819631638,
+    "exploration": 18.251732879596183
+  },
+  {
+    "iteration": 57,
+    "temperature": 0.6182409500921721,
+    "exploration": 18.36553748707954
+  },
+  {
+    "iteration": 58,
+    "temperature": 0.6191167696138661,
+    "exploration": 18.415803859502677
+  },
+  {
+    "iteration": 59,
+    "temperature": 0.6188880766333055,
+    "exploration": 18.50982956139003
+  },
+  {
+    "iteration": 60,
+    "temperature": 0.6160094112888841,
+    "exploration": 18.624037538838394
+  },
+  {
+    "iteration": 61,
+    "temperature": 0.6165645016384932,
+    "exploration": 18.717904778952487
+  },
+  {
+    "iteration": 62,
+    "temperature": 0.6193209101007684,
+    "exploration": 18.840303764643917
+  },
+  {
+    "iteration": 63,
+    "temperature": 0.6203834736833153,
+    "exploration": 18.998138342016414
+  },
+  {
+    "iteration": 64,
+    "temperature": 0.6213490350829626,
+    "exploration": 19.08709983634449
+  },
+  {
+    "iteration": 65,
+    "temperature": 0.6245229694140956,
+    "exploration": 19.205300649205697
+  },
+  {
+    "iteration": 66,
+    "temperature": 0.6274158417106009,
+    "exploration": 19.313176221125243
+  },
+  {
+    "iteration": 67,
+    "temperature": 0.6311035443376191,
+    "exploration": 19.35887615007407
+  },
+  {
+    "iteration": 68,
+    "temperature": 0.6344664480229965,
+    "exploration": 19.40041687007989
+  },
+  {
+    "iteration": 69,
+    "temperature": 0.6407022175654945,
+    "exploration": 19.420683387729675
+  },
+  {
+    "iteration": 70,
+    "temperature": 0.6453105507955957,
+    "exploration": 19.490845194451087
+  },
+  {
+    "iteration": 71,
+    "temperature": 0.6463897519090185,
+    "exploration": 19.52978013902027
+  },
+  {
+    "iteration": 72,
+    "temperature": 0.6497943170941168,
+    "exploration": 19.525736250959433
+  },
+  {
+    "iteration": 73,
+    "temperature": 0.6553241490607739,
+    "exploration": 19.482956522691335
+  }
+]

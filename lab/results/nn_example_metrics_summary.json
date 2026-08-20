@@ -1,0 +1,42 @@
+{
+  "input_dir": "/home/redmond/Projects/Onitama/src/onitama/opponents/NN/prepped_generations",
+  "generation_files": [
+    "gen_01.pt",
+    "gen_02.pt",
+    "gen_03.pt"
+  ],
+  "num_generation_files": 3,
+  "num_examples": 4678915,
+  "value_target": {
+    "mean": -0.003309881081804633,
+    "stdev": 0.4433456063270569,
+    "min": -1.0,
+    "max": 0.9959999918937683
+  },
+  "active_student_count": {
+    "mean": 2.2880501747131348,
+    "stdev": 1.2203350067138672,
+    "min": 0,
+    "max": 4
+  },
+  "student_diff": {
+    "mean": -0.07434843480587006,
+    "stdev": 0.6210727691650391,
+    "min": -4,
+    "max": 4
+  },
+  "initial_position_duplicate_card_arrangements": {
+    "initial_position_examples": 82598,
+    "initial_position_duplicated_examples": 0,
+    "initial_position_duplicated_arrangements": 0
+  },
+  "outputs": {
+    "value_hist": "nn_value_target_hist.png",
+    "active_student_hist": "nn_active_student_count_hist.png",
+    "student_diff_hist": "nn_student_diff_hist.png",
+    "card_counts_chart": "nn_card_presence_counts.png",
+    "card_counts_csv": "nn_card_presence_counts.csv",
+    "active_pair_chart": "nn_active_hand_pair_counts.png",
+    "active_pair_csv": "nn_active_hand_pair_counts.csv"
+  }
+}

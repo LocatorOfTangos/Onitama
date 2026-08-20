@@ -1,0 +1,3 @@
+src/onitama/opponents/NN/log*
+src/onitama/opponents/NN/*generation*
+!src/onitama/opponents/NN/prep_generations.py

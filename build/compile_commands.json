@@ -1,0 +1,8 @@
+[
+{
+  "directory": "/home/redmond/Projects/Onitama/build",
+  "command": "/usr/bin/g++ -Donitama_engine_EXPORTS -I/home/redmond/Projects/Onitama/src/onitama/engine -isystem /home/redmond/Projects/gvenv/lib/python3.12/site-packages/pybind11/include -isystem /usr/include/python3.12 -O2 -g -DNDEBUG -std=gnu++17 -fPIC -fvisibility=hidden -O3 -march=native -Wall -Wextra -o CMakeFiles/onitama_engine.dir/onitama_engine.cpp.o -c /home/redmond/Projects/Onitama/src/onitama/engine/onitama_engine.cpp",
+  "file": "/home/redmond/Projects/Onitama/src/onitama/engine/onitama_engine.cpp",
+  "output": "CMakeFiles/onitama_engine.dir/onitama_engine.cpp.o"
+}
+]

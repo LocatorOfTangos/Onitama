@@ -1,0 +1,2 @@
+[console_scripts]
+onitama = onitama.main:main

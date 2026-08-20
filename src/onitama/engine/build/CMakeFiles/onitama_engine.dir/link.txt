@@ -1,0 +1,1 @@
+/usr/bin/c++ -fPIC -O3 -DNDEBUG -flto=auto -shared  -o onitama_engine.cpython-312-x86_64-linux-gnu.so CMakeFiles/onitama_engine.dir/onitama_engine.cpp.o 
